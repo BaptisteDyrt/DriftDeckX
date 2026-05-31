@@ -1,43 +1,5 @@
-/**
- * Service "stats" — calculs purs pour le Dashboard.
- *
- * Prend en entrée une liste de presets et retourne des objets de stats
- * agrégés. Pas de DOM, pas de state, pas de storage : juste de la
- * transformation de données pure. Testable isolément.
- *
- * Conventions :
- *  - Toutes les fonctions retournent `null` si l'input est vide ou invalide
- *    (le rendu décidera quoi afficher dans ce cas — "—", "0", etc.)
- *  - Les moyennes sont arrondies au `step` du champ schema (cohérence avec
- *    les valeurs que CarX accepte vraiment)
- *  - Les pourcentages sont entiers (pas de 79.4%)
- *
- * Architecture : le dashboard appelle `computeDashboardStats(presets)` une
- * seule fois et reçoit un objet complet à consommer. Évite les passes
- * multiples sur le tableau pour rester performant même avec beaucoup de
- * presets.
- */
-
 import { TUNING_SCHEMA } from "../data/schema.js";
 
-
-// ─── API publique ────────────────────────────────────────────────────────
-
-/**
- * Calcule toutes les stats du Dashboard en une passe.
- *
- * @param {Array<object>} presets - liste des presets bruts du storage
- * @returns {object} stats agrégées :
- *   - presetCount        : nombre total de presets
- *   - carCount           : nombre de modèles uniques utilisés
- *   - turboPercent       : % de presets avec turbo activé (entier 0-100)
- *   - massAverage        : poids moyen en kg (entier arrondi)
- *   - suspensionAverages : Map<fieldId, average> pour les 14 champs suspension
- *   - alignmentAverages  : Map<fieldId, average> pour les 9 champs alignement
- *
- *   Si la liste est vide, retourne le même format avec des valeurs zéro/null
- *   pour que les composants puissent quand même se rendre sans crash.
- */
 export function computeDashboardStats(presets) {
   if (!Array.isArray(presets) || presets.length === 0) {
     return emptyStats();

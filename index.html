@@ -4,13 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DriftDeckX</title>
-
-  <!--
-    Google Fonts — Space Grotesk
-    - preconnect : ouvre la connexion TCP/TLS à l'avance pour gagner ~100ms
-    - display=swap : affiche d'abord en font système, swap quand Space Grotesk est prête (évite le "flash de texte invisible" / FOIT)
-    - 4 graisses chargées : 400 (normal), 500 (medium), 600 (semibold), 700 (bold)
-  -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -35,7 +28,6 @@
 
       <!-- ─── Navigation rapide : Dashboard ───────────────────────── -->
       <nav class="sidebar__nav" aria-label="Navigation rapide">
-        <!-- aria-current à faire changer en fonction de la vue active (à câbler en JS plus tard) -->
         <button type="button" class="nav-item" data-view="dashboard">
           <img src="./assets/icons/icon-dashboard.svg" alt="Icône Dashboard" class="nav-item__icon" aria-hidden="true" width="16" height="16">
           <span class="nav-item__label">Dashboard</span>
@@ -53,37 +45,16 @@
       <!-- ─── Section Garage (scroll interne) ─────────────────────── -->
       <section class="sidebar__garage" aria-label="Garage">
         <h2 class="garage__title">Garage</h2>
-
-        <!--
-          Container des brands.
-          ⚠️ Ce <ul> est vide au chargement HTML — son contenu sera
-          injecté dynamiquement par js/ui/sidebar.js depuis le state
-          et les données du storage.
-
-          L'attribut role="list" force Safari à garder la sémantique liste
-          même quand on retire les puces en CSS.
-        -->
         <ul id="garage-list" class="brands" role="list">
           <!-- Brands, cars et presets injectés dynamiquement par JS -->
         </ul>
 
       </section>
 
+      <p class="sidebar__footer">© 2026 Baptiste Dyrt - Discord : Clevess_</p>
+
     </aside>
 
-
-    <!-- ══════════════════════════════════════════════════════════════
-         MAIN PANEL
-         ══════════════════════════════════════════════════════════ -->
-    <!--
-      Tout le contenu du main panel est généré par JS selon state.view :
-      - "dashboard" → ui/dashboard.js
-      - "preset"    → ui/preset.js
-      - "form"    → ui/form.js
-
-      L'élément <main> reçoit le contenu via innerHTML / append depuis
-      js/main.js, qui orchestre les renders selon le state.
-    -->
     <main id="main-panel" class="main-panel" aria-live="polite">
       <!-- Contenu dynamique : dashboard ou détail d'un preset -->
     </main>

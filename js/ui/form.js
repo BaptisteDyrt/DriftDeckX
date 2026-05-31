@@ -1,30 +1,3 @@
-/**
- * Formulaire d'ajout de pré-réglage — multistep.
- *
- * Architecture :
- *  - Un seul step est rendu dans le DOM à la fois (par renderCurrentStep)
- *  - Le draft est conservé en mémoire JS dans `formState.draft`
- *  - Le step max atteint est tracké pour la cliquabilité du stepper
- *  - Une modale custom intercepte les tentatives de quitter le formulaire
- *
- * État du module (privé) :
- *  - formState.draft         : objet { brandId, modelId, name, tuning: {...} }
- *  - formState.currentStep   : numéro du step affiché (1-6)
- *  - formState.maxStepReached: dernier step atteint (pour cliquabilité)
- *  - formState.fieldErrors   : Map<fieldId, errorMessage>
- *
- * Flow :
- *  1. mountForm() initialise le draft, rend le step 1
- *  2. L'user modifie un champ → onFieldChange → met à jour draft + revalide
- *  3. Le bouton Suivant est enabled si tous les champs requis sont valides
- *  4. Click Suivant → incrémente currentStep + maxStepReached, re-render
- *  5. Click Précédent / Stepper / Sidebar → si modifications, modale, sinon nav
- *  6. Click Annuler → modale systématique
- *
- * Le step 1 (Identification + Poids) est entièrement implémenté ici.
- * Les steps 2-6 sont des placeholders qui seront construits ensuite.
- */
-
 import { BRANDS } from "../data/brands.js";
 import { MODELS } from "../data/models.js";
 import { TUNING_SCHEMA, getDefaultTuning } from "../data/schema.js";
@@ -1447,8 +1420,6 @@ async function saveNewPreset() {
       tuning: formState.draft.tuning
     });
 
-    console.log("[form] Pré-réglage créé :", newPreset.id);
-
     const model = MODELS.find(m => m.id === newPreset.modelId);
     if (!model) {
       console.warn("[form] Modèle introuvable pour brandId, retour Dashboard");
@@ -1488,8 +1459,6 @@ async function saveEditedPreset() {
     await updatePreset(presetId, {
       tuning: formState.draft.tuning
     });
-
-    console.log("[form] Pré-réglage mis à jour :", presetId);
 
     // Reset du formState pour qu'un futur "Ajouter" / "Éditer" reparte
     // proprement (pas de fuite de l'ancien draft).

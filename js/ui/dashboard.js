@@ -1,31 +1,3 @@
-/**
- * Vue Dashboard — page d'accueil de DriftDeckX.
- *
- * Layout :
- *
- *   NEVER LOOSE THEM AGAIN
- *   DriftDeckX
- *
- *   ┌────────┬────────┬────────┬────────┐
- *   │  40    │  72    │  79%   │ 1350kg │   ← KPI cards (4)
- *   │voitures│réglages│turbo on│poids   │
- *   └────────┴────────┴────────┴────────┘
- *
- *   ┌──────────────────┬─────────────────┐
- *   │  Suspensions     │  Alignement     │   ← average cards (2)
- *   │  (moyennes)      │  (moyennes)     │
- *   └──────────────────┴─────────────────┘
- *
- * Cas garage vide : on remplace les cards par un message d'accueil + CTA
- * "Ajouter un réglage" pour orienter l'user qui débarque.
- *
- * Les valeurs affichées dans les cards Suspension et Alignement sont les
- * MOYENNES de tous les presets enregistrés (calculées par services/stats.js).
- * Le rendu visuel est identique à la vue détail (mêmes classes .preset-card,
- * .preset-row, etc.) pour cohérence — sauf qu'au lieu d'un preset précis,
- * on affiche des moyennes.
- */
-
 import { listPresets } from "../storage.js";
 import { TUNING_SCHEMA } from "../data/schema.js";
 import { showAddSetupForm } from "../state.js";
@@ -145,12 +117,10 @@ function renderEmptyState() {
  */
 function renderPrivacyNote() {
   return el("p", { class: "dashboard__privacy-note" },
-    "DriftDeckX V0 fonctionne 100% dans ton navigateur. Tes réglages sont " +
-    "stockés localement sur ton PC (dans le localStorage du navigateur). " +
-    "Aucune donnée n'est envoyée nulle part, pas de serveur, pas de compte, " +
-    "pas de tracking. Si tu vides le cache de ton navigateur, tu perds " +
-    "tout — pense à noter tes réglages importants ailleurs en attendant " +
-    "la V1 desktop."
+    "DriftDeckX V0 fonctionne 100% sur ta machine. Tes réglages sont stockés localement " +
+    "sur ton PC. Aucune donnée n'est envoyée nulle part, pas de serveur, pas de compte, " +
+    "pas de tracking. Si tu désintalles DrifDeckX tu perds tout. " +
+    "Pense à récupérer tes réglages stockés dans presets.json dans le dossier de l'application."
   );
 }
 

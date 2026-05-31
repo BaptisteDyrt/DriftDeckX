@@ -21,27 +21,15 @@ ol[role="list"] {
 }
 
 html {
-  /* Hauteur de ligne plus généreuse que la valeur par défaut (1.0 chez
-     certains navigateurs) — rend tout le texte plus lisible */
   line-height: 1.5;
-
-  /* Empêche iOS d'agrandir le texte en orientation paysage */
   -webkit-text-size-adjust: 100%;
-
-  /* Smooth scroll natif quand on click sur une ancre */
   scroll-behavior: smooth;
 }
 
 body {
-  /* Empêche le débordement horizontal accidentel (bug fréquent en mobile
-     mais aussi en desktop si on a un élément qui dépasse) */
   min-height: 100dvh;
-
-  /* Rend le texte plus lisible sur écrans haute densité (Retina, 4K) */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  /* Améliore le rendu typographique (kerning, ligatures) */
   text-rendering: optimizeLegibility;
 }
 

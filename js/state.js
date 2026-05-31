@@ -1,49 +1,3 @@
-/**
- * État global de l'application DriftDeckX.
- *
- * Ce module centralise l'état UI de l'app et notifie les composants quand
- * il change. C'est le "système nerveux" qui relie les actions de l'user
- * (click sur une car, etc.) au re-rendu de l'interface.
- *
- * ─── Pourquoi un module dédié ? ─────────────────────────────────────────
- *
- * Sans framework type React/Vue, on a besoin d'un mécanisme qui :
- *  1. Stocke l'état courant en un seul endroit (source de vérité)
- *  2. Permet aux composants UI de réagir aux changements (subscribe)
- *  3. Évite que chaque module modifie l'état n'importe comment
- *
- * Le pattern utilisé est le "store observable" (subscribe / notify) :
- *  - Les composants s'abonnent via `subscribe(callback)`
- *  - Quand l'état change via `setState(patch)`, tous les callbacks sont
- *    appelés avec le nouvel état
- *
- * ─── État géré ──────────────────────────────────────────────────────────
- *
- * - `view`             : "dashboard" | "preset" — quelle vue afficher
- * - `activeCarId`      : modelId de la voiture sélectionnée dans la sidebar
- * - `activePresetId`   : id du preset actuellement affiché en main panel
- * - `expandedBrands`   : Set des brandId actuellement déployées dans l'accordéon
- *
- * Note : les DONNÉES (presets, brands, models) ne sont PAS dans le state.
- * Elles vivent dans storage.js / data/. Le state ne contient que l'état UI.
- *
- * ─── Conventions ────────────────────────────────────────────────────────
- *
- * - L'état est IMMUTABLE en lecture : `getState()` retourne un snapshot,
- *   pas une référence mutable. Les composants ne peuvent pas modifier
- *   l'état en bidouillant l'objet retourné.
- * - `setState(patch)` est la SEULE façon de modifier l'état.
- * - Les setters spécialisés (setView, setActiveCar...) sont des raccourcis
- *   sémantiques au-dessus de setState.
- */
-
-
-// ─── État initial ────────────────────────────────────────────────────────
-
-/**
- * Valeurs de départ au chargement de l'app.
- * Refresh = retour au Dashboard, car/preset deselect, accordéons fermés.
- */
 const INITIAL_STATE = {
   view: "dashboard",          // "dashboard" | "preset" | "add-setup" | "edit-setup"
   activeCarId: null,          // modelId de la voiture active (null si aucune)
@@ -51,22 +5,11 @@ const INITIAL_STATE = {
   expandedBrands: new Set()   // Set<brandId> des brands déployées
 };
 
-
-// ─── État interne du module (privé) ──────────────────────────────────────
-
-/**
- * L'état courant. Modifié uniquement via setState().
- * Le `expandedBrands` Set est cloné à chaque mise à jour pour préserver
- * l'immutabilité externe.
- */
 let _state = {
   ...INITIAL_STATE,
   expandedBrands: new Set(INITIAL_STATE.expandedBrands)
 };
 
-/**
- * Liste des abonnés (callbacks à appeler quand l'état change).
- */
 const _subscribers = new Set();
 
 
@@ -103,10 +46,6 @@ export function setState(patch) {
   _notify();
 }
 
-/**
- * Restaure l'état initial (équivalent refresh sans recharger la page).
- * Utile pour un bouton "retour accueil" ou un reset manuel.
- */
 export function resetState() {
   _state = {
     ...INITIAL_STATE,
@@ -115,16 +54,6 @@ export function resetState() {
   _notify();
 }
 
-
-// ─── API publique : setters sémantiques ──────────────────────────────────
-//
-// Ces fonctions sont des raccourcis au-dessus de setState() qui rendent
-// le code appelant plus lisible et qui encapsulent la logique métier
-// (ex: changer de car → reset du preset actif).
-
-/**
- * Affiche le Dashboard et désélectionne la car/preset actifs.
- */
 export function showDashboard() {
   setState({
     view: "dashboard",

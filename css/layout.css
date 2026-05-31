@@ -1,66 +1,18 @@
-/* ============================================================================
-   DriftDeckX — Layout
-   ============================================================================
-
-   Structure générale de l'application :
-
-   ┌────────────────────────────────────────────────────┐
-   │                                                    │
-   │  ┌─────────┐  ┌────────────────────────────────┐   │
-   │  │         │  │                                │   │
-   │  │ Sidebar │  │       Main Panel               │   │
-   │  │ 216px   │  │       (1fr)                    │   │
-   │  │         │  │                                │   │
-   │  │         │  │                                │   │
-   │  └─────────┘  └────────────────────────────────┘   │
-   │                                                    │
-   └────────────────────────────────────────────────────┘
-            100dvh (toute la fenêtre)
-
-   On utilise CSS Grid plutôt que Flexbox pour 3 raisons :
-   1. Le `1fr` du main panel est plus prévisible qu'avec flex-grow
-   2. La grille permet plus facilement d'ajouter une 3e colonne plus tard
-      (panneau latéral droit, par exemple)
-   3. Pas besoin de `flex-shrink: 0` sur la sidebar pour éviter qu'elle
-      se compresse
-   ========================================================================= */
-
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Container racine de l'app
-   ───────────────────────────────────────────────────────────────────── */
-
 .app {
-  /* Grille à 2 colonnes : sidebar fixe + main panel élastique */
+
   display: grid;
   grid-template-columns: var(--size-sidebar-width) 1fr;
-
-  /* Occupe toute la hauteur de la fenêtre */
   height: 100dvh;
   width: 100%;
-
-  /* Empêche tout débordement accidentel au niveau racine */
   overflow: hidden;
 }
 
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Main panel : zone principale à droite de la sidebar
-   ─────────────────────────────────────────────────────────────────────────
-   La sidebar a déjà son scroll interne (cf. sidebar.css). Le main panel
-   gère le sien indépendamment ici : si le contenu (formulaire de preset,
-   dashboard) déborde, c'est ce panel qui scrolle, pas toute la page.
-   ───────────────────────────────────────────────────────────────────── */
-
 .main-panel {
-  /* La zone scrollable principale de l'app */
   overflow-y: auto;
   overflow-x: hidden;
 
-  /* Hauteur cadrée à 100dvh moins rien (la grille .app gère déjà) */
   height: 100%;
 
-  /* Padding par défaut généreux — les vues internes peuvent l'override */
   padding: var(--space-8);
   margin: 0 5dvw;
 
@@ -71,16 +23,6 @@
   scrollbar-color: transparent transparent;
 }
 
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Vues internes du main panel (placeholders pour l'instant)
-   ─────────────────────────────────────────────────────────────────────────
-   Ces styles seront déplacés dans des fichiers components/ dédiés quand
-   on construira vraiment le Dashboard et la vue preset. Pour V0, on met
-   le minimum pour que les placeholders soient visibles et centrés.
-   ───────────────────────────────────────────────────────────────────── */
-
-/* Dashboard (vue par défaut) */
 .dashboard {
   display: flex;
   align-items: center;
@@ -108,10 +50,6 @@
   color: var(--color-text-muted);
 }
 
-/* Vue preset (placeholder en attendant le formulaire).
-   Occupe toute la largeur disponible du main panel (pas de max-width
-   imposé) — c'est le composant interne qui décide de sa propre largeur
-   si besoin. */
 .preset-view {
   width: 100%;
 }

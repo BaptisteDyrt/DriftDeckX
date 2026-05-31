@@ -1,28 +1,4 @@
 /**
- * Helpers DOM pour DriftDeckX.
- *
- * Sans framework, créer et manipuler des éléments DOM à la main devient vite
- * verbeux (`document.createElement`, `setAttribute`, `appendChild`...). Ces
- * helpers condensent les opérations les plus fréquentes en fonctions courtes
- * et lisibles.
- *
- * ─── Les 4 helpers ──────────────────────────────────────────────────────
- *
- *   el(tag, attrs, children)  → crée un élément (le helper central)
- *   $(selector, parent?)      → querySelector raccourci
- *   $$(selector, parent?)     → querySelectorAll en vrai Array
- *   clear(element)            → vide un élément de ses enfants
- *
- * ─── Pourquoi pas un framework ? ────────────────────────────────────────
- *
- * Pour le scope de DriftDeckX V0, ces 4 helpers suffisent à garder le code
- * lisible sans la complexité d'un framework. Si l'app grossit beaucoup en
- * V2 (configurateur intelligent, etc.), on pourra envisager Preact ou
- * lit-html, mais pas avant d'en avoir vraiment besoin.
- */
-
-
-/**
  * Crée un élément DOM avec ses attributs, événements et enfants.
  *
  * @param {string} tag - Nom de la balise ("div", "button", "input"...)
@@ -40,47 +16,24 @@
  * - `disabled`,    → propriétés booléennes appliquées directement
  *   `checked`...
  * - autres         → setAttribute classique
- *
- * ─── Exemples ───────────────────────────────────────────────────────────
- *
- *   el("div", { class: "card" }, "Bonjour")
- *
- *   el("button", { onClick: () => save(), class: "btn" }, "Enregistrer")
- *
- *   el("input", {
- *     type: "number",
- *     value: 12,
- *     dataset: { field: "mass" },
- *     onInput: (e) => update(e.target.value)
- *   })
- *
- *   el("ul", { class: "list" }, [
- *     el("li", {}, "Item 1"),
- *     el("li", {}, "Item 2")
- *   ])
  */
 export function el(tag, attrs = {}, children = null) {
   const node = document.createElement(tag);
 
   for (const [key, value] of Object.entries(attrs)) {
-    // Ignorer les valeurs null/undefined (permet le conditionnel inline :
-    // { class: isActive ? "active" : null })
     if (value == null) continue;
 
-    // Événements : clé "on" + Majuscule (onClick, onInput, onChange...)
     if (key.length > 2 && key.startsWith("on") && key[2] === key[2].toUpperCase()) {
       const eventName = key.slice(2).toLowerCase();
       node.addEventListener(eventName, value);
       continue;
     }
 
-    // class → className
     if (key === "class") {
       node.className = value;
       continue;
     }
 
-    // dataset → data-* attributes
     if (key === "dataset" && typeof value === "object") {
       for (const [dataKey, dataVal] of Object.entries(value)) {
         if (dataVal == null) continue;
@@ -89,29 +42,21 @@ export function el(tag, attrs = {}, children = null) {
       continue;
     }
 
-    // style → propriétés CSS
     if (key === "style" && typeof value === "object") {
       Object.assign(node.style, value);
       continue;
     }
 
-    // Propriétés booléennes : appliquées directement sur l'objet DOM
-    // (disabled, checked, selected, readOnly...). On les détecte par le
-    // type booléen de la valeur.
     if (typeof value === "boolean") {
       node[key] = value;
       continue;
     }
 
-    // value / textContent : propriétés directes pour les form fields
-    // (setAttribute("value", ...) ne met pas à jour la valeur courante
-    // d'un input après interaction, alors que .value oui)
     if (key === "value") {
       node.value = value;
       continue;
     }
 
-    // Tout le reste → attribut HTML standard
     node.setAttribute(key, value);
   }
 
@@ -121,12 +66,6 @@ export function el(tag, attrs = {}, children = null) {
   return node;
 }
 
-
-/**
- * Ajoute un ou plusieurs enfants à un nœud.
- * Gère : null (ignoré), string (texte), Node (élément), Array (récursif).
- * Privé — utilisé par el().
- */
 function appendChildren(node, children) {
   if (children == null) return;
 
@@ -142,7 +81,6 @@ function appendChildren(node, children) {
     return;
   }
 
-  // string, number, etc. → nœud texte
   node.appendChild(document.createTextNode(String(children)));
 }
 

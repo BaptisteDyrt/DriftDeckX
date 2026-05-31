@@ -1,25 +1,3 @@
-/**
- * Service "garage" — logique métier au-dessus de storage.js.
- *
- * Responsabilités :
- *  - Orchestrer les opérations CRUD sur les presets avec leurs conséquences
- *    (state, sidebar, redirection)
- *  - Calculer les redirections en cascade après une suppression
- *  - Centraliser la logique métier qui combine plusieurs modules (storage,
- *    state, models, brands)
- *
- * Pourquoi un module dédié plutôt qu'appeler storage.js directement ?
- *  - Évite la duplication de logique (la cascade de redirection serait
- *    autrement réimplémentée à chaque endroit qui supprime)
- *  - Permet de tester la logique métier indépendamment de l'UI
- *  - Prépare le terrain pour V1 où storage.js sera remplacé par Firebase
- *    (le garage continuera de fonctionner identiquement)
- *
- * Les fonctions ici NE TOUCHENT JAMAIS le DOM directement. Elles mutent
- * uniquement le storage et le state — la sidebar et la vue se rafraîchissent
- * via le subscriber dans main.js.
- */
-
 import { listPresets, deletePreset, updatePreset } from "../storage.js";
 import { MODELS } from "../data/models.js";
 import { BRANDS } from "../data/brands.js";

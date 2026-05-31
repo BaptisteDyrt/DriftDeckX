@@ -1,24 +1,3 @@
-/* ============================================================================
-   DriftDeckX — Base CSS
-   ============================================================================
-
-   Styles HTML globaux qui s'appliquent à toute l'app indépendamment des
-   composants. Ce fichier vient APRÈS reset.css et tokens.css.
-
-   On y trouve :
-     - Le style du <body> (fond, font, couleur)
-     - Le style de focus global (accessibilité)
-     - La typo de base des titres et paragraphes
-     - Le style des éléments HTML basiques (kbd, code, etc.)
-
-   Les composants (sidebar, dashboard...) overrident ces styles si besoin.
-   ========================================================================= */
-
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Body : fond, font, couleur de base
-   ───────────────────────────────────────────────────────────────────── */
-
 body {
   font-family: var(--font-family);
   font-size: var(--font-size-md);
@@ -27,23 +6,8 @@ body {
 
   color: var(--color-text);
   background: var(--color-bg);
-
-  /* Empêche les "rebonds" de scroll sur certains navigateurs en cas
-     d'overscroll (bonne pratique pour une app type SPA) */
   overscroll-behavior: none;
 }
-
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Focus visible : style accessible et lisible
-   ─────────────────────────────────────────────────────────────────────────
-   On utilise `:focus-visible` plutôt que `:focus` pour ne montrer
-   l'outline QUE lors de la navigation clavier (Tab), pas au click souris
-   où c'est visuellement parasite.
-
-   Le style par défaut ici est une ombre lime — les composants peuvent
-   l'override avec `box-shadow: var(--shadow-accent-glow)`.
-   ───────────────────────────────────────────────────────────────────── */
 
 :focus {
   outline: none;
@@ -54,15 +18,6 @@ body {
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
-
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Titres : tailles cohérentes avec l'échelle de tokens
-   ─────────────────────────────────────────────────────────────────────────
-   Les tailles par défaut des navigateurs (h1=2em, h2=1.5em...) sont des
-   ratios qui ne correspondent pas à notre échelle modulaire. On reset
-   et on redéfinit selon nos tokens.
-   ───────────────────────────────────────────────────────────────────── */
 
 h1 {
   font-size: var(--font-size-3xl);
@@ -89,18 +44,11 @@ h4, h5, h6 {
   line-height: var(--line-height-tight);
 }
 
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Éléments HTML basiques utilisés ailleurs dans l'app
-   ───────────────────────────────────────────────────────────────────── */
-
-/* <kbd> : raccourcis clavier (utilisé dans la sidebar nav) */
 kbd {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
 }
 
-/* <code> : si on affiche du code (debug, etc.) */
 code {
   font-family: var(--font-family-mono);
   font-size: 0.9em;
@@ -109,20 +57,11 @@ code {
   border-radius: var(--radius-sm);
 }
 
-/* <hr> : séparateurs */
 hr {
   border: none;
   border-top: 1px solid var(--color-border);
   margin: var(--space-4) 0;
 }
-
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Scrollbar globale : appliquée à tout sauf overrides locaux
-   ─────────────────────────────────────────────────────────────────────────
-   La sidebar a sa propre scrollbar override dans sidebar.css. Celle-ci
-   est le fallback global pour le main panel et autres zones scrollables.
-   ───────────────────────────────────────────────────────────────────── */
 
 * {
   scrollbar-width: thin;

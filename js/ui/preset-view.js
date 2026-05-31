@@ -1,34 +1,3 @@
-/**
- * Vue détail d'un pré-réglage — lecture seule.
- *
- * Affiche les 62 champs du tuning groupés par section dans une grille
- * 3 colonnes :
- *
- *   ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
- *   │   SUSPENSION     │ │   ALIGNEMENT     │ │   TRANSMISSION   │
- *   │                  │ │                  │ │   (étendu)       │
- *   └──────────────────┘ └──────────────────┘ │                  │
- *   ┌─────────────────────────────────────┐   │                  │
- *   │              PNEUS                  │   │                  │
- *   │         (étendu sur 2 cols)         │   │                  │
- *   └─────────────────────────────────────┘   └──────────────────┘
- *   ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
- *   │     FREINS       │ │     MOTEUR       │ │     POIDS        │
- *   └──────────────────┘ └──────────────────┘ └──────────────────┘
- *
- * Header au-dessus de la grille :
- *  - Brand name (lime uppercase)
- *  - Model nameReal - nameCarx (séparateur "-")
- *  - Pills des presets de la voiture (switch entre presets sans sidebar)
- *
- * 3 types de visualisation des valeurs :
- *  - Texte simple (label gauche / valeur droite, avec préfixes AV/AR si paire)
- *  - Barre de progression "simple" (lime, gauche vers droite)
- *  - Barre de progression "split" (depuis le centre, gauche OU droite)
- *
- * 7 icônes thématiques (assets/icons/icon-*.svg) à côté du titre de chaque card.
- */
-
 import { BRANDS } from "../data/brands.js";
 import { MODELS } from "../data/models.js";
 import { TUNING_SCHEMA } from "../data/schema.js";
@@ -38,30 +7,7 @@ import { el, clear } from "../utils/dom.js";
 import { openModal } from "./modal.js";
 import { deletePresetWithRedirection, renamePreset } from "../services/garage.js";
 
-
-// ─── Configuration des champs en "split bar" ─────────────────────────────
-
-/**
- * IDs des champs à afficher en barre split (centre vers gauche/droite).
- * Tous les autres champs avec unité % sont en barre "simple" (lime gauche
- * → droite, valeur centrée).
- *
- * Pour l'instant, aucun champ n'utilise la split bar : tous les % (balance,
- * transfer, centerOfMass, etc.) sont en barre simple. On garde ce mécanisme
- * et le code de `renderSplitBar` au cas où on aurait besoin de la
- * réactiver pour un champ plus tard.
- */
 const SPLIT_BAR_FIELDS = new Set();
-
-
-// ─── Configuration des cards ─────────────────────────────────────────────
-
-/**
- * Ordre d'affichage des cards et icône associée.
- * Le nom doit matcher une `key` de TUNING_SCHEMA (sauf "weight" qui devient
- * une card "Poids" séparée, alors que dans le schema Identification+Poids
- * sont mélangés au step 1).
- */
 const CARD_CONFIG = [
   { id: "suspension",   title: "Suspension",   icon: "icon-damper.svg",    area: "suspension" },
   { id: "alignment",    title: "Alignement",   icon: "icon-alignment.svg", area: "alignment" },
@@ -72,15 +18,6 @@ const CARD_CONFIG = [
   { id: "weight",       title: "Poids",        icon: "icon-weight.svg",    area: "poids" }
 ];
 
-
-// ─── Helpers de formatage ────────────────────────────────────────────────
-
-/**
- * Formate un nombre pour l'affichage : entier si pas de décimales utiles,
- * sinon 1-2 décimales selon la précision.
- *
- * Exemples : 17.5 → "17,5", 1350 → "1 350", 0 → "0"
- */
 function formatNumber(value) {
   if (typeof value !== "number" || !Number.isFinite(value)) return "—";
 
@@ -105,18 +42,6 @@ function formatUnit(unit) {
   return unit;
 }
 
-
-// ─── Détection du type de visualisation ──────────────────────────────────
-
-/**
- * Détermine le type de visualisation à utiliser pour un champ donné.
- *
- *  - "split"   : barre split (centre vers gauche/droite) → champs de
- *                répartition (balance, transfer)
- *  - "bar"     : barre simple lime → champs en % autres que ci-dessus
- *  - "boolean" : badge ON/OFF compact → champs type:boolean
- *  - "text"    : texte simple aligné à droite → tout le reste
- */
 function getVisualizationType(field) {
   if (field.type === "boolean") return "boolean";
   if (SPLIT_BAR_FIELDS.has(field.id)) return "split";
@@ -124,18 +49,6 @@ function getVisualizationType(field) {
   return "text";
 }
 
-
-// ─── Helpers pour gérer les paires AV/AR ─────────────────────────────────
-
-/**
- * À partir d'une liste de champs schema dont certains ont un préfixe
- * front/rear (AV/AR), retourne une liste "regroupée" où chaque paire AV+AR
- * apparaît comme une seule entrée.
- *
- * Format de retour :
- *  - Champs simples : { kind: "single", field }
- *  - Paires AV+AR   : { kind: "pair", baseId, front, rear, label }
- */
 function groupAxisPairs(fields) {
   const result = [];
   const seenBaseIds = new Set();

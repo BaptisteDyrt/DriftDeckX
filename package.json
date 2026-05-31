@@ -1,0 +1,25 @@
+{
+  "name": "driftdeckx",
+  "version": "1.0.0",
+  "description": "",
+  "main": "electron.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BaptisteDyrt/DriftDeckX.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/BaptisteDyrt/DriftDeckX/issues"
+  },
+  "homepage": "https://github.com/BaptisteDyrt/DriftDeckX#readme",
+  "devDependencies": {
+    "electron": "^42.3.0"
+  }
+}

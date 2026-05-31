@@ -1,48 +1,3 @@
-/**
- * Rendu de la sidebar DriftDeckX.
- *
- * Ce module est responsable de générer dynamiquement le contenu du
- * <ul id="garage-list"> avec les brands, cars et presets de l'user.
- *
- * ─── Architecture ──────────────────────────────────────────────────────
- *
- * Stratégie de rendu : "innerHTML monolithique".
- * À chaque changement de state, on régénère TOUT le HTML de la sidebar
- * en une seule string et on remplace le innerHTML du container. C'est
- * simple, performant pour un volume raisonnable (< 200 cars), et ça nous
- * évite la complexité du diffing manuel.
- *
- * Avantages :
- *  - Une seule source de vérité : le state + les données
- *  - Pas de "drift" entre l'état affiché et l'état réel
- *  - Code linéaire facile à lire
- *
- * Inconvénients (à connaître) :
- *  - Les inputs/focus de la sidebar disparaissent à chaque render
- *    (mais la sidebar n'a pas d'inputs, donc OK)
- *  - Les animations CSS qui dépendent d'un state DOM persistant peuvent
- *    rejouer (ex: si on rajoute des transitions sur les items, à voir)
- *
- * ─── Event handling ────────────────────────────────────────────────────
- *
- * Event delegation : un seul listener attaché au <ul id="garage-list">
- * qui intercepte tous les clicks et dispatch selon la cible (data-*
- * attributes). Marche même après re-render, pas besoin de re-attacher.
- *
- * Pattern : on lit `data-action` sur l'élément cliqué pour savoir quoi
- * faire (toggle-brand / select-car / select-preset).
- *
- * ─── Affichage des cars ─────────────────────────────────────────────────
- *
- * Format choisi pour les cars : 2 lignes par item.
- *  - Ligne 1 : nom IRL (ex: "Silvia S15")
- *  - Ligne 2 : nom CarX en petit gris (ex: "Spector RS")
- *
- * Les presets ne sont affichés QUE sous la car active, et UNIQUEMENT si
- * la car a 2+ presets (sinon le clic sur la car charge directement son
- * unique preset, pas besoin de sous-liste).
- */
-
 import { BRANDS } from "../data/brands.js";
 import { MODELS } from "../data/models.js";
 import { listPresets } from "../storage.js";
@@ -55,15 +10,6 @@ import {
 import { requestNavigation } from "./form.js";
 
 
-// ─── Helpers ─────────────────────────────────────────────────────────────
-
-/**
- * Échappe les caractères HTML dangereux dans une string user-controllée.
- * À utiliser pour TOUS les contenus qui viennent du storage ou des inputs.
- *
- * Sans ça, un user qui nomme son preset `<script>alert('xss')</script>`
- * verrait son code exécuté quand on injecte le nom via innerHTML.
- */
 function escapeHtml(str) {
   if (str == null) return "";
   return String(str)
@@ -74,11 +20,6 @@ function escapeHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
-/**
- * Cherche un modèle par son id dans la liste statique.
- * Cas où on ne trouve pas : preset stocké pointe vers un model supprimé
- * du jeu (rare mais possible). On retourne un placeholder sécurisé.
- */
 function findModel(modelId) {
   return MODELS.find(m => m.id === modelId) || {
     id: modelId,
@@ -88,31 +29,6 @@ function findModel(modelId) {
   };
 }
 
-
-// ─── Construction du modèle de données pour le rendu ─────────────────────
-
-/**
- * À partir de la liste plate de presets, construit une structure groupée
- * par brand → car → presets. Ne renvoie que les brands non-vides
- * (filtrées au rendu, comme convenu).
- *
- * Structure de sortie :
- *   [
- *     {
- *       brand: { id, name },
- *       cars: [
- *         {
- *           model: { id, brandId, nameReal, nameCarx },
- *           presets: [ {id, modelId, name, ...}, ... ]
- *         }
- *       ]
- *     }
- *   ]
- *
- * L'ordre des brands respecte BRANDS[]. L'ordre des cars suit l'ordre
- * d'apparition de chaque modelId dans le tableau de presets — à terme on
- * pourrait trier alpha ou par dernière utilisation, mais pas en V0.
- */
 function buildGarageTree(presets) {
   // Map<brandId, Map<modelId, presets[]>>
   const tree = new Map();
@@ -252,16 +168,6 @@ function renderSidebarHtml(presets, state) {
   }).join("");
 }
 
-
-// ─── API publique ────────────────────────────────────────────────────────
-
-/**
- * Met à jour la sidebar avec l'état courant. À appeler après chaque
- * changement de state (via subscribe dans main.js).
- *
- * Charge les presets de manière asynchrone (storage.js est async-first
- * pour préparer Firebase V1).
- */
 export async function renderSidebar() {
   const container = document.getElementById("garage-list");
   if (!container) {
@@ -274,18 +180,6 @@ export async function renderSidebar() {
   container.innerHTML = renderSidebarHtml(presets, state);
 }
 
-/**
- * Câble l'event delegation sur le container de la sidebar.
- * À appeler une seule fois au démarrage (depuis main.js).
- *
- * Tous les clicks dans la sidebar sont interceptés ici et dispatchés
- * vers le bon setter de state selon le `data-action` de l'élément.
- *
- * Cas particulier `<summary>` : on intercepte le click et on appelle
- * `preventDefault()` pour gérer l'état d'expansion via notre state JS
- * plutôt que via le comportement natif <details>. Sinon on aurait un
- * double-toggle (natif + notre state).
- */
 export async function attachSidebarEvents() {
   const container = document.getElementById("garage-list");
   if (!container) {
