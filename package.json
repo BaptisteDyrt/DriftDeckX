@@ -1,6 +1,6 @@
 {
   "name": "driftdeckx",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Outil de sauvegarde de préréglages pour CarX Drift Racing Online",
   "main": "electron.js",
   "author": "Baptiste Dayraut",
@@ -36,10 +36,11 @@
       "target": [
         {
           "target": "dmg",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
         }
       ]
     },
@@ -48,9 +49,7 @@
       "target": [
         {
           "target": "nsis",
-          "arch": [
-            "x64"
-          ]
+          "arch": ["x64"]
         }
       ]
     },
