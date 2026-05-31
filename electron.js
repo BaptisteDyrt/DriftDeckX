@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, nativeImage } = require('electron')
+const { app, BrowserWindow, ipcMain, nativeImage, dialog } = require('electron')
 const { autoUpdater } = require('electron-updater')
 const path = require('path')
 const fs = require('fs')
@@ -61,7 +61,32 @@ app.whenReady().then(() => {
   app.dock.setIcon(icon)
 
   createWindow()
+
+  // Auto-update
   autoUpdater.checkForUpdatesAndNotify()
+
+  autoUpdater.on('update-available', () => {
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Mise à jour disponible',
+      message: 'Une nouvelle version de DriftDeckX est disponible.',
+      detail: 'Elle sera téléchargée en arrière-plan et installée au prochain redémarrage.',
+      buttons: ['OK']
+    })
+  })
+
+  autoUpdater.on('update-downloaded', () => {
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Mise à jour prête',
+      message: 'La mise à jour a été téléchargée.',
+      detail: 'Redémarre l\'app pour installer la nouvelle version.',
+      buttons: ['Redémarrer maintenant', 'Plus tard']
+    }).then(result => {
+      if (result.response === 0) autoUpdater.quitAndInstall()
+    })
+  })
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
