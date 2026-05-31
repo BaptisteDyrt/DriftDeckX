@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install dependencies
         run: npm install
@@ -28,7 +28,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload mac artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: mac-build
           path: |
@@ -44,7 +44,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install dependencies
         run: npm install
@@ -55,7 +55,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload win artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: win-build
           path: |
@@ -68,19 +68,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download mac build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: mac-build
           path: dist/mac
 
       - name: Download win build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: win-build
           path: dist/win
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             dist/mac/*.dmg
