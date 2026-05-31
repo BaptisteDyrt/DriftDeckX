@@ -26,9 +26,9 @@
     "copyright": "© 2026 Baptiste Dayraut",
     "files": [
       "**/*",
-      "!node_modules/**/*",
       "!dist/**/*",
-      "!.git/**/*"
+      "!.git/**/*",
+      "!.github/**/*"
     ],
     "mac": {
       "category": "public.app-category.utilities",
