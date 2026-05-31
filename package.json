@@ -1,6 +1,6 @@
 {
   "name": "driftdeckx",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Outil de sauvegarde de préréglages pour CarX Drift Racing Online",
   "main": "electron.js",
   "author": "Baptiste Dayraut",

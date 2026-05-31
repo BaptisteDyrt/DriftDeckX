@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, nativeImage, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, nativeImage, dialog, shell } = require('electron')
 const { autoUpdater } = require('electron-updater')
 const path = require('path')
 const fs = require('fs')
@@ -63,29 +63,54 @@ app.whenReady().then(() => {
   createWindow()
 
   // Auto-update
-  autoUpdater.checkForUpdatesAndNotify()
+  if (process.platform === 'win32') {
+    // Auto-update complet sur Windows
+    autoUpdater.checkForUpdatesAndNotify()
 
-  autoUpdater.on('update-available', () => {
-    dialog.showMessageBox({
-      type: 'info',
-      title: 'Mise à jour disponible',
-      message: 'Une nouvelle version de DriftDeckX est disponible.',
-      detail: 'Elle sera téléchargée en arrière-plan et installée au prochain redémarrage.',
-      buttons: ['OK']
+    autoUpdater.on('update-available', () => {
+      dialog.showMessageBox({
+        type: 'info',
+        title: 'Mise à jour disponible',
+        message: 'Une nouvelle version de DriftDeckX est disponible.',
+        detail: 'Elle sera téléchargée en arrière-plan et installée au prochain redémarrage.',
+        buttons: ['OK']
+      })
     })
-  })
 
-  autoUpdater.on('update-downloaded', () => {
-    dialog.showMessageBox({
-      type: 'info',
-      title: 'Mise à jour prête',
-      message: 'La mise à jour a été téléchargée.',
-      detail: 'Redémarre l\'app pour installer la nouvelle version.',
-      buttons: ['Redémarrer maintenant', 'Plus tard']
-    }).then(result => {
-      if (result.response === 0) autoUpdater.quitAndInstall()
+    autoUpdater.on('update-downloaded', () => {
+      dialog.showMessageBox({
+        type: 'info',
+        title: 'Mise à jour prête',
+        message: 'La mise à jour a été téléchargée.',
+        detail: 'Redémarre l\'app pour installer la nouvelle version.',
+        buttons: ['Redémarrer maintenant', 'Plus tard']
+      }).then(result => {
+        if (result.response === 0) autoUpdater.quitAndInstall()
+      })
     })
-  })
+
+  } else {
+    // Notification manuelle sur macOS
+    autoUpdater.checkForUpdates().then(result => {
+      if (result && result.updateInfo) {
+        const latest = result.updateInfo.version
+        const current = app.getVersion()
+        if (latest !== current) {
+          dialog.showMessageBox({
+            type: 'info',
+            title: 'Mise à jour disponible',
+            message: `Une nouvelle version de DriftDeckX est disponible (v${latest}).`,
+            detail: 'Télécharge la dernière version sur GitHub pour mettre à jour.',
+            buttons: ['Ouvrir GitHub', 'Plus tard']
+          }).then(r => {
+            if (r.response === 0) {
+              shell.openExternal('https://github.com/BaptisteDyrt/DriftDeckX/releases/latest')
+            }
+          })
+        }
+      }
+    }).catch(() => {})
+  }
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
