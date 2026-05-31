@@ -34,6 +34,8 @@ jobs:
           path: |
             dist/*.dmg
             dist/*.dmg.blockmap
+            dist/*.zip
+            dist/*.zip.blockmap
             dist/latest-mac.yml
 
   build-win:
@@ -85,6 +87,8 @@ jobs:
           files: |
             dist/mac/*.dmg
             dist/mac/*.dmg.blockmap
+            dist/mac/*.zip
+            dist/mac/*.zip.blockmap
             dist/mac/latest-mac.yml
             dist/win/*.exe
             dist/win/*.exe.blockmap
