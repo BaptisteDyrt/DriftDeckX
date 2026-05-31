@@ -1,0 +1,729 @@
+/* ============================================================================
+   DriftDeckX — Vue détail d'un préréglage
+   ============================================================================
+
+   Structure :
+     .preset-view
+       ├─ .preset-header          (brand + modèle + pills presets)
+       └─ .preset-grid            (grille 3 cols × 3 rows avec areas)
+           ├─ .preset-card (×7)   (Suspension, Alignement, Pneus, etc.)
+           │   ├─ .preset-card__header
+           │   └─ .preset-card__body
+           │       └─ .preset-row (×N)
+           │           ├─ .preset-row__label
+           │           └─ .preset-row__value
+           │               └─ .preset-value | .preset-bar | .preset-badge
+           ↑
+           Layout grid-template-areas qui place les cards et fait spanner
+           Pneus sur 2 cols + Transmission sur 2 rows.
+   ========================================================================= */
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Container racine
+   ───────────────────────────────────────────────────────────────────── */
+
+.preset-view {
+  width: 100%;
+  padding: var(--space-6) 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.preset-view__error {
+  padding: var(--space-8);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Header : brand + modèle + pills presets
+   ───────────────────────────────────────────────────────────────────── */
+
+.preset-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.preset-header__brand {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-widest);
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.preset-header__title {
+  margin: 0;
+  font-size: 3rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  color: var(--color-text);
+
+  /* Permet le passage à la ligne propre si nameReal + nameCarx trop longs */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0;
+}
+
+.preset-header__separator {
+  /* Le séparateur "-" garde son espacement uniforme avec les noms */
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+/* Toolbar : pills à gauche, barre d'actions à droite, alignés sur la même
+   ligne sous le titre. Wrap si l'écran est étroit. */
+.preset-header__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+/* Pills : un bouton par preset disponible pour cette voiture */
+.preset-header__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.preset-pill {
+  /* Reset bouton */
+  appearance: none;
+  font-family: inherit;
+  cursor: pointer;
+
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-strong);
+  background: transparent;
+  color: var(--color-text-muted);
+
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+
+  transition: background var(--transition-fast),
+              border-color var(--transition-fast),
+              color var(--transition-fast);
+}
+
+.preset-pill:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+  border-color: var(--color-text-subtle);
+}
+
+.preset-pill:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-accent-glow);
+}
+
+/* Pill du preset actif : bordure lime + texte lime, fond transparent */
+.preset-pill--active {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-bg-elevated);
+}
+
+.preset-pill--active:hover {
+  /* Évite l'effet hover gris sur le pill actif */
+  background: var(--color-bg-elevated);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Barre d'actions (Exporter / Modifier dropdown / Supprimer)
+   ─────────────────────────────────────────────────────────────────────────
+
+   3 boutons côte à côte alignés à droite du toolbar :
+     - Exporter      : primaire, fond lime plein
+     - Modifier      : secondaire, fond lime atténué, avec dropdown
+     - Supprimer     : carré, fond sombre, icône poubelle rouge
+
+   Tous ont une hauteur cohérente (même padding vertical) pour s'aligner
+   visuellement entre eux et avec les pills à gauche.
+   ───────────────────────────────────────────────────────────────────── */
+
+.preset-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Style commun aux 3 boutons : reset + dimensions */
+.preset-action {
+  appearance: none;
+  font-family: inherit;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+  white-space: nowrap;
+
+  transition: background var(--transition-fast),
+              border-color var(--transition-fast),
+              color var(--transition-fast);
+}
+
+.preset-action:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-accent-glow);
+}
+
+.preset-action__icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.preset-action__label {
+  /* Le label peut être masqué visuellement sur petits écrans plus tard
+     si besoin (pour ne garder que les icônes). Pour V0, toujours visible. */
+}
+
+/* Chevron du bouton dropdown : petit, hérite de la couleur du parent */
+.preset-action__chevron {
+  font-size: var(--font-size-xs);
+  margin-left: var(--space-1);
+  line-height: 1;
+  transition: transform var(--transition-fast);
+}
+
+
+/* ─── Variante primary : Exporter (lime plein) ─────────────────────── */
+
+.preset-action--primary {
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+  border-color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+}
+
+.preset-action--primary:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+
+/* ─── Variante secondary : Modifier (lime atténué) ─────────────────── */
+
+.preset-action--secondary {
+  background: var(--color-accent-faint);
+  color: var(--color-text);
+  border-color: var(--color-accent-faint);
+}
+
+.preset-action--secondary:hover {
+  background: var(--color-bg-active);
+  border-color: var(--color-accent);
+}
+
+
+/* ─── Variante danger : Supprimer (carré rouge sur fond sombre) ────── */
+
+.preset-action--danger {
+  background: var(--color-bg-sidebar);
+  color: var(--color-danger);
+  border-color: var(--color-border-strong);
+  /* Carré : padding égal vertical/horizontal pour avoir un ratio 1:1
+     visible. Pas de label, donc on resserre le padding latéral. */
+  padding: var(--space-2);
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preset-action--danger:hover {
+  background: var(--color-danger-faint);
+  color: var(--color-text);
+  border-color: var(--color-danger);
+}
+
+.preset-action--danger .preset-action__icon {
+  width: 12px;
+  height: 12px;
+}
+
+/* L'icône delete : on inverse les couleurs au hover via filter pour rester
+   compatible avec l'icône SVG existante. Variante simple : on garde l'icône
+   colorée intrinsèquement par son SVG (rouge), elle ressort sur le hover
+   rouge plein car le SVG est lui-même teinté. */
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Dropdown du bouton "Modifier le réglage"
+   ─────────────────────────────────────────────────────────────────────────
+
+   Wrapper positionné relatif → le menu est positionné absolute par rapport.
+   Le menu s'ouvre vers le bas, aligné à droite du bouton parent, et fait
+   AU MINIMUM la même largeur que le bouton parent (mais peut être plus
+   large si les options sont longues).
+
+   Visible uniquement quand le wrapper a la classe `--open`.
+   ───────────────────────────────────────────────────────────────────── */
+
+.preset-action-dropdown {
+  position: relative;
+}
+
+/* Chevron rotation à 180° quand le dropdown est ouvert */
+.preset-action-dropdown--open .preset-action__chevron {
+  transform: rotate(180deg);
+}
+
+.preset-action-menu {
+  /* Caché par défaut */
+  display: none;
+
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  right: 0;
+
+  /* Largeur minimum = largeur du bouton parent (cohérence visuelle) */
+  min-width: 100%;
+
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+
+  padding: var(--space-1);
+  z-index: var(--z-dropdown);
+
+  flex-direction: column;
+}
+
+/* Quand le wrapper est --open, on affiche le menu */
+.preset-action-dropdown--open .preset-action-menu {
+  display: flex;
+}
+
+.preset-action-menu__item {
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  white-space: nowrap;
+
+  transition: background var(--transition-fast);
+}
+
+.preset-action-menu__item:hover,
+.preset-action-menu__item:focus-visible {
+  background: var(--color-bg-hover);
+  outline: none;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Grille principale : 3 colonnes × 3 rangées avec grid-template-areas
+   ─────────────────────────────────────────────────────────────────────────
+
+   Layout :
+     ┌────────────────┬────────────────┬────────────────┐
+     │  Suspension    │  Alignement    │  Transmission  │
+     ├────────────────┴────────────────┤   (étendue     │
+     │           Pneus (2 cols)        │    sur 2 rows) │
+     ├────────────────┬────────────────┼────────────────┤
+     │  Freins        │  Moteur        │  Poids         │
+     └────────────────┴────────────────┴────────────────┘
+   ───────────────────────────────────────────────────────────────────── */
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-areas:
+    "suspension  alignment   transmission"
+    "pneus       pneus       transmission"
+    "freins      moteur      poids";
+  gap: var(--space-4);
+  align-items: start;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Card : container par section (Suspension, Alignement, etc.)
+   ───────────────────────────────────────────────────────────────────── */
+
+.preset-card {
+  background: var(--color-bg-sidebar);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.preset-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.preset-card__icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.preset-card__title {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.preset-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Variante 2 colonnes : utilisée uniquement par la card Pneus, qui s'étend
+   sur 2 colonnes du layout global et bénéficie d'un layout horizontal.
+
+   `grid-auto-flow: column` + `grid-template-rows: repeat(N, auto)` force
+   le remplissage VERTICAL par colonne (Size→Pression→Adhérence à gauche,
+   puis Empattement→Écart à droite) plutôt que ligne par ligne.
+
+   Pour 5 lignes : 3 lignes max par colonne → la 1re colonne porte 3 items,
+   la 2e porte 2 items. C'est exactement le rendu attendu.
+
+   Note : si le nombre de champs change un jour, ajuster grid-template-rows
+   en conséquence. Pour 5 champs → 3, pour 6 → 3, pour 7 → 4, etc.
+   */
+.preset-card__body--cols-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(3, auto);
+  grid-auto-flow: column;
+  column-gap: var(--space-6);
+  row-gap: var(--space-3);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Row : une ligne champ (label gauche / valeur droite)
+   ───────────────────────────────────────────────────────────────────── */
+
+.preset-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+
+  min-height: 24px;
+}
+
+/* Pour les rows avec barre, la valeur prend plus de place */
+.preset-row--bar,
+.preset-row--split {
+  grid-template-columns: minmax(0, auto) minmax(120px, 1fr);
+}
+
+.preset-row__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-muted);
+
+  /* Si trop long, tronque proprement */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preset-row__value {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  justify-content: flex-end;
+
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+/* Valeur en mode "paire AV/AR" : 2 valeurs côte à côte, alignées à droite */
+.preset-row__value--pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  justify-items: end;
+  /* Largeur fixe pour cohérence verticale entre lignes */
+  min-width: 200px;
+}
+
+/* Row désactivée (champ conditionnel non rempli) : valeur "—" en gris */
+.preset-row--disabled .preset-row__label,
+.preset-row__value--dash {
+  color: var(--color-text-subtle);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Value (texte) : nombre + unité + préfixe AV/AR
+   ─────────────────────────────────────────────────────────────────────────
+
+   Exemple visuel : "17.5 av"
+   ───────────────────────────────────────────────────────────────────── */
+
+.preset-value {
+  display: inline-flex;
+  align-items: baseline;
+  white-space: nowrap;
+  gap: var(--space-2);
+}
+
+.preset-value__number {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  letter-spacing: 0.02em;
+}
+
+.preset-value__unit {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-subtle);
+}
+
+.preset-value__axis {
+  /* Préfixe "AV"/"AR" en mono petit gris, après la valeur */
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-subtle);
+  text-transform: uppercase;
+}
+
+.preset-value__dash {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-subtle);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Barre de progression "simple" (lime gauche → droite)
+   ─────────────────────────────────────────────────────────────────────────
+
+   Utilisée pour les champs en % (autres que balance et transfer).
+   Le label "<valeur><unité>" est superposé au centre de la barre.
+   ───────────────────────────────────────────────────────────────────── */
+
+.preset-bar {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.preset-bar--simple {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-strong);
+}
+
+.preset-bar__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--color-accent-faint);
+  /* width inline via style attribute */
+  border-right: 1px solid var(--color-accent);
+}
+
+.preset-bar__label {
+  position: absolute;
+  padding : 8px;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.preset-bar__number {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.preset-bar__unit {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Barre "split" (deux côtés depuis le centre)
+   ─────────────────────────────────────────────────────────────────────────
+
+   Utilisée pour balance (Répartition freins) et transfer (Transfert poids).
+   Visuel : 2 demi-barres côte à côte, chacune se remplit depuis le centre
+   vers l'extérieur. Labels affichés à gauche et à droite.
+
+       25%  [████░░░░░│███████████]  75%
+                       ↑ centre
+   ───────────────────────────────────────────────────────────────────── */
+
+.preset-bar--split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-strong);
+}
+
+.preset-bar__half {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  overflow: hidden;
+}
+
+.preset-bar__half--left {
+  /* Le label est à gauche, le fill se remplit de droite vers gauche */
+  justify-content: flex-start;
+  /* Border droite = ligne médiane */
+  border-right: 1px solid var(--color-border-strong);
+}
+
+.preset-bar__half--right {
+  /* Le label est à droite, le fill se remplit de gauche vers droite */
+  justify-content: flex-end;
+}
+
+.preset-bar__half-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--color-accent-faint);
+}
+
+.preset-bar__half-fill--left {
+  /* Se remplit de la droite vers la gauche (côté médiane vers extérieur) */
+  right: 0;
+  /* width inline */
+  border-left: 1px solid var(--color-accent);
+}
+
+.preset-bar__half-fill--right {
+  /* Se remplit de la gauche vers la droite (côté médiane vers extérieur) */
+  left: 0;
+  /* width inline */
+  border-right: 1px solid var(--color-accent);
+}
+
+.preset-bar__half-label {
+  position: relative;
+  z-index: 1;
+  padding: 0 var(--space-2);
+
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Badge ON/OFF (pour ABS, Turbo, V7, V8)
+   ─────────────────────────────────────────────────────────────────────────
+
+   Représentation compacte d'un boolean en lecture seule. Plus discret
+   qu'un toggle complet.
+
+   Variantes :
+     - on  : fond lime, texte foncé, "ON" en mono uppercase
+     - off : fond transparent, bordure gris, "OFF" en gris
+   ───────────────────────────────────────────────────────────────────── */
+
+.preset-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-wide);
+  line-height: 1.4;
+
+  /* Largeur fixe pour aligner ON/OFF visuellement entre lignes */
+  min-width: 32px;
+  text-align: center;
+}
+
+.preset-badge--on {
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+}
+
+.preset-badge--off {
+  background: transparent;
+  color: var(--color-text-subtle);
+  border: 1px solid var(--color-border-strong);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Ligne spécifique Turbo / V7 / V8 (badge + valeur en ligne)
+   ───────────────────────────────────────────────────────────────────── */
+
+.preset-row__value--gear {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.preset-row--turbo .preset-row__value,
+.preset-row--gear .preset-row__value {
+  /* Badge + valeur alignés à droite */
+  justify-content: flex-end;
+}

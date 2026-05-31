@@ -1,0 +1,921 @@
+/* ============================================================================
+   DriftDeckX — Formulaire d'ajout de pré-réglage
+   ============================================================================
+
+   Structure :
+     .add-setup-form
+       ├─ .form-header        (titre + breadcrumb)
+       ├─ .form-layout        (grille stepper + contenu)
+       │   ├─ .form-stepper   (latéral gauche)
+       │   └─ .form-content   (steps + actions)
+       └─ (modale en overlay, ajoutée à body)
+   ========================================================================= */
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Container racine du formulaire
+   ───────────────────────────────────────────────────────────────────── */
+
+.add-setup-form {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0;
+  padding: var(--space-6) 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Header : breadcrumb + titre + tagline
+   ───────────────────────────────────────────────────────────────────── */
+
+.form-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.form-header__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-widest);
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.form-header__dot {
+  color: var(--color-text-subtle);
+}
+
+.form-header__title {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  color: var(--color-text);
+}
+
+.form-header__tagline {
+  margin: 0;
+  font-size: var(--font-size-md);
+  color: var(--color-text-muted);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Layout : stepper à gauche + contenu à droite
+   ───────────────────────────────────────────────────────────────────── */
+
+.form-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: var(--space-10);
+  align-items: start;
+}
+
+.form-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Stepper latéral : 4 états (active, completed, visited, inactive)
+   ─────────────────────────────────────────────────────────────────────────
+
+   Logique des états :
+   - active    : c'est le step courant (cercle lime "doux", label blanc)
+   - completed : step déjà validé via click Suivant (cercle bordure lime
+                 + ✓ lime à droite du label)
+   - visited   : step atteint mais pas validé via Suivant (cercle bordure
+                 lime atténuée à 20% — cliquable mais "incomplet")
+   - inactive  : jamais atteint (tout en gris)
+
+   Différence completed vs visited : un step où l'user est passé en
+   cliquant Précédent depuis plus loin sans repasser par Suivant est
+   "visited" (incomplet), pas "completed".
+   ───────────────────────────────────────────────────────────────────── */
+
+.form-stepper {
+  position: sticky;
+  top: var(--space-6);
+}
+
+.form-stepper__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+
+  /* Ligne verticale qui relie les cercles */
+  position: relative;
+}
+
+/* Ligne verticale grise qui passe au milieu des cercles (28px de large) */
+.form-stepper__list::before {
+  content: "";
+  position: absolute;
+  left: 14px;  /* milieu des cercles 28px */
+  top: 28px;
+  bottom: 28px;
+  width: 1px;
+  background: var(--color-track);
+}
+
+.form-stepper__item {
+  position: relative;
+}
+
+.form-stepper__button {
+  /* Reset bouton */
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.form-stepper__button:disabled {
+  cursor: not-allowed;
+}
+
+.form-stepper__button:not(:disabled):hover .form-stepper__label {
+  color: var(--color-text);
+}
+
+.form-stepper__button:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-accent-glow);
+  border-radius: var(--radius-sm);
+}
+
+/* Pastille numérotée (28×28) */
+.form-stepper__number {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+
+  /* z-index pour passer au-dessus de la ligne verticale */
+  position: relative;
+  z-index: 1;
+
+  transition: background var(--transition-base),
+              color var(--transition-base),
+              border-color var(--transition-base);
+}
+
+.form-stepper__label {
+  flex: 1;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-fast);
+}
+
+/* ✓ à droite du label (pour les steps completed uniquement).
+   Caractère unicode stylé en lime, pas un SVG (createElement('svg') créerait
+   un élément HTML invisible, on évite ce piège en utilisant juste du texte). */
+.form-stepper__check {
+  flex-shrink: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  color: var(--color-accent);
+}
+
+
+/* ─── État actif : cercle lime "doux" (fond accent atténué + bordure lime) ── */
+
+.form-stepper__item--active .form-stepper__number {
+  background: var(--color-bg);
+  color: var(--color-accent);
+  border: 2px solid var(--color-accent);
+}
+.form-stepper__item--active .form-stepper__label {
+  color: var(--color-text);
+}
+
+
+/* ─── État completed : bordure lime, label blanc, ✓ à droite ── */
+
+.form-stepper__item--completed .form-stepper__number {
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+  border: 2px solid var(--color-accent);
+}
+.form-stepper__item--completed .form-stepper__label {
+  color: var(--color-text);
+}
+
+
+/* ─── Cumul active + completed : le visuel "active" prend le dessus ──
+   Cas : l'user revient sur un step déjà validé (cliqué Suivant dessus puis
+   est revenu avec Précédent ou en cliquant le stepper).
+   On veut le cercle "active" (fond lime soft) MAIS on garde le ✓ visible.
+   La sélection avec 2 classes a une spécificité plus haute que --completed
+   seul, donc cette règle override sans !important. */
+
+.form-stepper__item--active.form-stepper__item--completed .form-stepper__number {
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+  border: 2px solid var(--color-accent);
+}
+
+
+/* ─── État visited : bordure lime atténuée (20% d'opacité) ── */
+
+.form-stepper__item--visited .form-stepper__number {
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  /* Bordure lime à 20% d'opacité pour signaler "atteint mais non validé" */
+  border: 2px solid rgba(202, 255, 0, 0.2);
+}
+.form-stepper__item--visited .form-stepper__label {
+  color: var(--color-text-muted);
+}
+
+
+/* ─── État inactif : tout en gris ── */
+
+.form-stepper__item--inactive .form-stepper__number {
+  background: var(--color-bg);
+  color: var(--color-text-subtle);
+  border: 2px solid var(--color-border-strong);
+}
+.form-stepper__item--inactive .form-stepper__label {
+  color: var(--color-text-subtle);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Zone d'actions sous le stepper (UNIQUEMENT en mode édition)
+   ─────────────────────────────────────────────────────────────────────────
+
+   Bouton "Mettre à jour" (primary lime) + "Annuler" (secondary gris)
+   empilés verticalement, alignés sur la même grille que les items du
+   stepper. Cette zone permet à l'user de sauvegarder ses modifs depuis
+   n'importe quel step sans avoir à atteindre le step 6.
+
+   Marge généreuse au-dessus pour bien séparer visuellement des items du
+   stepper.
+   ───────────────────────────────────────────────────────────────────── */
+
+.form-stepper-actions {
+  margin-top: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.form-stepper-actions__save,
+.form-stepper-actions__cancel {
+  appearance: none;
+  font-family: inherit;
+  cursor: pointer;
+
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+
+  transition: background var(--transition-fast),
+              border-color var(--transition-fast),
+              color var(--transition-fast),
+              opacity var(--transition-fast);
+}
+
+.form-stepper-actions__save:focus-visible,
+.form-stepper-actions__cancel:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-accent-glow);
+}
+
+.form-stepper-actions__save:disabled,
+.form-stepper-actions__cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Mettre à jour : bouton primary lime plein */
+.form-stepper-actions__save {
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+  border-color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+}
+
+.form-stepper-actions__save:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+/* Annuler : bouton secondary neutre, transparent + bordure */
+.form-stepper-actions__cancel {
+  background: transparent;
+  color: var(--color-text-muted);
+  border-color: var(--color-border-strong);
+}
+
+.form-stepper-actions__cancel:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+  border-color: var(--color-text-subtle);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Step container (la zone qui change selon le step courant)
+   ───────────────────────────────────────────────────────────────────── */
+
+.form-step-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.form-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Cartes (Identification, Poids, etc.)
+   ───────────────────────────────────────────────────────────────────── */
+
+.form-card {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6) var(--space-6);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.form-card__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.form-card__placeholder {
+  margin: 0;
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  background: var(--color-bg);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Champs AV+AR (Suspension, Alignement, Roue, etc.)
+   ─────────────────────────────────────────────────────────────────────────
+
+   Structure visuelle pour chaque champ AV+AR :
+
+     ┌─────────────────────────────────────────────────────┐
+     │  Longueur                                  CM       │  ← header
+     │  AV  [____________]      AR  [____________]         │  ← row
+     │      Valeur max : 35 cm                              │  ← erreur AV
+     └─────────────────────────────────────────────────────┘
+
+   - Un seul header (label + unité) par champ logique
+   - Deux inputs côte à côte (2 colonnes égales)
+   - Préfixe "AV"/"AR" à gauche de chaque input (gris, mono, petit)
+   - Message d'erreur sous l'input concerné uniquement
+   ───────────────────────────────────────────────────────────────────── */
+
+/* Container pour la liste des champs AV+AR dans une card */
+.form-axis-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Variante 2 colonnes : utilisée uniquement par le step 6 (Transmission)
+   qui a 14 champs et bénéficie d'un layout plus compact horizontalement.
+   Les champs se placent automatiquement de gauche à droite, ligne par ligne,
+   dans l'ordre du DOM (= ordre du schema). */
+.form-axis-fields--2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5) var(--space-6);
+}
+
+/* Un champ AV+AR : header + row(2 inputs) */
+.form-axis-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Header : label à gauche, unité à droite */
+.form-axis-field__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.form-axis-field__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.form-axis-field__unit {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+  white-space: nowrap;
+}
+
+/* Row : 2 colonnes égales pour AV et AR */
+.form-axis-field__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+/* Un input avec son préfixe AV/AR à gauche + son éventuel message d'erreur */
+.form-axis-input {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* Row interne : préfixe AV/AR + input */
+.form-axis-input__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Préfixe AV/AR : petit, mono, gris, espacement large */
+.form-axis-input__prefix {
+  flex-shrink: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-subtle);
+  text-transform: uppercase;
+  /* Largeur fixe pour aligner verticalement AV et AR entre les lignes */
+  min-width: 20px;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Champs "AV uniquement" pleine largeur
+   ─────────────────────────────────────────────────────────────────────────
+
+   Utilisé pour les champs sans dédoublement AV/AR (ex: Chasse, Direction,
+   Braquage, Ackermann, Pivot dans la section Alignement).
+
+   Structure visuelle :
+
+     ┌─────────────────────────────────────────────────────┐
+     │  Chasse                                      GRAD   │  ← header
+     │  [_____________________________________________]    │  ← input pleine largeur
+     │  Valeur max : 15 grad                                │  ← erreur sous l'input
+     └─────────────────────────────────────────────────────┘
+
+   Note : ces champs n'ont pas de préfixe (puisqu'il n'y a qu'un axe).
+   L'unité est dans le header (cohérent avec step 1), pas en suffixe interne.
+   Les .form-axis-fields parent garde le gap vertical entre lignes.
+   ───────────────────────────────────────────────────────────────────── */
+
+.form-single-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* Header : même style que les champs AV+AR pour cohérence */
+.form-single-field__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.form-single-field__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.form-single-field__unit {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+  white-space: nowrap;
+}
+
+
+/* ─── Variante --disabled : champ conditionnel inactif ──
+   Appliqué quand un champ avec `enabledIf` ne remplit pas sa condition
+   (ex: Pression quand Turbo est OFF). Le label et l'unité sont grisés
+   visuellement. L'input lui-même est désactivé via l'attribut disabled
+   qui est déjà stylé par .form-field__input:disabled. */
+
+.form-single-field--disabled .form-single-field__label,
+.form-single-field--disabled .form-single-field__unit {
+  color: var(--color-text-subtle);
+  opacity: 0.6;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Toggle boolean (ABS, Turbo, hasGear7, etc.)
+   ─────────────────────────────────────────────────────────────────────────
+
+   Switch horizontal pleine largeur (mêmes dimensions qu'un input numérique).
+   Une pastille slide de gauche à droite quand on bascule l'état, et le
+   label "OFF" / "ON" à droite change de couleur (gris → lime).
+
+   Structure HTML :
+     <button class="form-toggle" (--on quand activé)>
+       <span class="form-toggle__handle"></span>  ← la pastille animée
+       <span class="form-toggle__label">OFF/ON</span>
+     </button>
+
+   Le bouton entier est cliquable. Animation CSS uniquement (transform sur
+   .form-toggle__handle), donc fluide et performante.
+   ───────────────────────────────────────────────────────────────────── */
+
+.form-toggle {
+  /* Reset bouton */
+  appearance: none;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+
+  /* Dimensions : largeur pleine, hauteur cohérente avec un input */
+  width: 100%;
+  /* Padding vertical équivalent à un input numérique */
+  padding: var(--space-3) var(--space-3);
+  border-radius: var(--radius-md);
+
+  /* Layout interne : pastille à gauche, label à droite */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+
+  transition: border-color var(--transition-fast),
+              background var(--transition-fast);
+}
+
+.form-toggle:hover {
+  border-color: var(--color-text-subtle);
+}
+
+.form-toggle:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-accent-glow);
+}
+
+/* Pastille (handle) — wrapper qui contient le cercle animé.
+   Le wrapper a une largeur fixe (deux fois la taille du cercle) pour
+   créer la "piste" sur laquelle le cercle slide. */
+.form-toggle__handle {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+
+  /* Piste : 36px de large × 16px de haut */
+  width: 36px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  background: var(--color-border-strong);
+
+  transition: background var(--transition-base);
+}
+
+/* Le cercle (la "pastille" qui slide) — créé via ::before sur le handle.
+   Position gauche par défaut (état OFF), animé vers la droite quand ON. */
+.form-toggle__handle::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  transform: translateY(-50%);
+
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: var(--color-text-muted);
+
+  transition: left var(--transition-base),
+              background var(--transition-base);
+}
+
+/* Label "OFF" / "ON" — à droite, mono, gris par défaut */
+.form-toggle__label {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-subtle);
+  text-transform: uppercase;
+
+  transition: color var(--transition-fast);
+}
+
+
+/* ─── État ON : pastille à droite, fond piste lime, label lime ── */
+
+.form-toggle--on .form-toggle__handle {
+  background: var(--color-accent-faint);
+}
+
+.form-toggle--on .form-toggle__handle::before {
+  /* 36px (largeur piste) - 12px (cercle) - 2px (padding gauche) - 2px (padding droite) = 20px de gauche */
+  left: 22px;
+  background: var(--color-accent);
+}
+
+.form-toggle--on .form-toggle__label {
+  color: var(--color-accent);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Grille de champs
+   ───────────────────────────────────────────────────────────────────── */
+
+.form-grid {
+  display: grid;
+  gap: var(--space-4) var(--space-6);
+}
+
+.form-grid--2col {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Champ qui occupe toute la largeur de la grille */
+.form-field--full {
+  grid-column: 1 / -1;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Champ individuel : label + hint + input + erreur
+   ───────────────────────────────────────────────────────────────────── */
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.form-field__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.form-field__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.form-field__hint {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.form-field__input,
+.form-field__select {
+  /* Reset */
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: inherit;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+
+  /* Style — fond plus profond que la card pour bien ressortir */
+  width: 100%;
+  padding: var(--space-3) var(--space-3);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+
+  transition: border-color var(--transition-fast),
+              box-shadow var(--transition-fast);
+}
+
+.form-field__input::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.form-field__input:hover:not(:disabled),
+.form-field__select:hover:not(:disabled) {
+  border-color: var(--color-text-subtle);
+}
+
+.form-field__input:focus,
+.form-field__select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-accent-glow);
+}
+
+.form-field__input:disabled,
+.form-field__select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Inputs numériques : font-mono pour alignement vertical des chiffres */
+.form-field__input[type="number"] {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-base);
+  letter-spacing: 0.02em;
+}
+
+/* Cacher les spinners natifs des input number (peu utilisés et moches) */
+.form-field__input[type="number"]::-webkit-inner-spin-button,
+.form-field__input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.form-field__input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Flèche custom pour les <select> (l'appearance:none a viré la native) */
+.form-field__select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3e%3cpath d='M3 4.5 L6 7.5 L9 4.5' stroke='%238A8A92' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right var(--space-4) center;
+  padding-right: var(--space-10);
+}
+
+/* Message d'erreur sous l'input */
+.form-field__error {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-danger);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Barre d'actions (Annuler / Précédent / Suivant)
+   ───────────────────────────────────────────────────────────────────── */
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.form-actions__nav {
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* Bouton Annuler — discret */
+.form-actions__cancel {
+  appearance: none;
+  border: 1px solid var(--color-border-strong);
+  background: transparent;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+
+  transition: background var(--transition-fast),
+              border-color var(--transition-fast);
+}
+
+.form-actions__cancel:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-text-subtle);
+}
+
+/* Bouton Précédent — secondaire */
+.form-actions__prev {
+  appearance: none;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+
+  transition: background var(--transition-fast);
+}
+
+.form-actions__prev:hover:not(:disabled) {
+  background: var(--color-bg-hover);
+}
+
+.form-actions__prev:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Bouton Suivant — primaire (accent lime) */
+.form-actions__next {
+  appearance: none;
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+
+  transition: background var(--transition-fast);
+}
+
+.form-actions__next:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.form-actions__next:disabled {
+  background: var(--color-bg-elevated);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-subtle);
+  cursor: not-allowed;
+}

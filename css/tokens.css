@@ -1,0 +1,273 @@
+/* ============================================================================
+   DriftDeckX — Design Tokens
+   ============================================================================
+
+   Source unique de vérité pour l'identité visuelle de l'app. Toute couleur,
+   espacement, taille ou typographie utilisée ailleurs DOIT référencer une
+   de ces variables. Aucune valeur en dur dans les feuilles de composants.
+
+   Pourquoi ?
+   - Cohérence : une seule définition par valeur, impossible d'avoir 3 nuances
+     de "gris sombre" qui traînent dans le code.
+   - Maintenabilité : changer l'accent lime en orange = 1 ligne modifiée.
+   - Préparation des thèmes futurs (light mode, thèmes saisonniers...) en
+     redéfinissant ce fichier sans toucher au reste.
+
+   ----------------------------------------------------------------------------
+   Conventions de nommage :
+   - --color-*       : toutes les couleurs
+   - --font-*        : famille, tailles, poids, espacements lettre
+   - --space-*       : espacements (padding, margin, gap)
+   - --radius-*      : rayons de bordure
+   - --shadow-*      : ombres portées
+   - --transition-*  : durées d'animation
+   - --size-*        : dimensions fixes (largeur sidebar, etc.)
+   ========================================================================= */
+
+:root {
+
+  /* ──────────────────────────────────────────────────────────────────────
+     COULEURS — Fonds
+     ─────────────────────────────────────────────────────────────────── */
+
+  /* Fond principal de l'app (zone main panel) */
+  --color-bg:               #0A0A0C;
+
+  /* Fond de la sidebar — légèrement plus clair pour créer une séparation
+     subtile sans ligne de bordure visible */
+  --color-bg-sidebar:       #121216;
+
+  /* Fond des éléments "élevés" : cartes de preset, modales, dropdowns.
+     Encore un cran plus clair pour ressortir des fonds. */
+  --color-bg-elevated:      #1A1A20;
+
+  /* Fond au survol (boutons, items de liste, etc.) */
+  --color-bg-hover:         #1F1F25;
+
+  /* Fond actif (item sélectionné dans la sidebar, etc.) — teinté avec
+     un soupçon d'accent pour le côté "JDM signal" */
+  --color-bg-active:        #2A2D1A;
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     COULEURS — Accent (lime signature)
+     ─────────────────────────────────────────────────────────────────── */
+
+  /* Couleur signature de DriftDeckX. Utilisée pour :
+     - Indicateur de car active dans la sidebar
+     - Boutons primaires (CTA)
+     - Highlights, focus rings
+     - Badges importants */
+  --color-accent:           #CAFF00;
+
+  /* Version assombrie pour les états hover des boutons accent */
+  --color-accent-hover:     #B8E800;
+
+  /* Version désaturée/atténuée pour les éléments accent secondaires
+     (chevron actif, par exemple) */
+  --color-accent-dim:       #7A9900;
+
+  /* Version très atténuée pour les fonds teintés accent (sélection, etc.) */
+  --color-accent-faint:     rgba(202, 255, 0, 0.08);
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     COULEURS — Texte
+     ─────────────────────────────────────────────────────────────────── */
+
+  /* Texte principal — blanc cassé pour réduire la fatigue oculaire sur
+     fond noir profond (le blanc pur sature trop) */
+  --color-text:             #E8E8EA;
+
+  /* Texte secondaire — descriptions, sous-titres, tagline */
+  --color-text-muted:       #8A8A92;
+
+  /* Texte discret — labels de section ("GARAGE"), captions, métadonnées */
+  --color-text-subtle:      #5A5A62;
+
+  /* Texte sur fond accent (lime) — sombre pour le contraste */
+  --color-text-on-accent:   #0A0A0C;
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     COULEURS — Bordures et séparateurs
+     ─────────────────────────────────────────────────────────────────── */
+
+  /* Bordure fine, à peine visible — pour les divisions subtiles */
+  --color-border:           #1F1F25;
+
+  /* Bordure plus marquée — pour les éléments qu'on veut délimiter clairement */
+  --color-border-strong:    #2D2D35;
+
+  /* Track grise verticale de l'indicateur de car active dans la sidebar */
+  --color-track:            #2D2D35;
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     COULEURS — États sémantiques
+     ─────────────────────────────────────────────────────────────────── */
+
+  /* Erreur, suppression, danger */
+  --color-danger:           #FF4757;
+  --color-danger-faint:     rgba(255, 71, 87, 0.1);
+
+  /* Succès, sauvegarde réussie */
+  --color-success:          #2ED573;
+
+  /* Avertissement, action non-réversible */
+  --color-warning:          #FFA502;
+
+  /* Information neutre */
+  --color-info:             #54A0FF;
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     TYPOGRAPHIE — Familles
+     ─────────────────────────────────────────────────────────────────── */
+
+  /* Famille principale : Space Grotesk en priorité (chargée via Google Fonts ou
+     en local), fallbacks système modernes. Space Grotesk est le standard de fait
+     pour les UIs sombres modernes (Linear, Vercel, Notion). */
+  --font-family:
+    "Space Grotesk",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Roboto",
+    "Helvetica Neue",
+    sans-serif;
+
+  /* Famille monospace : pour les valeurs numériques de tuning
+     (alignement vertical des chiffres, lisibilité chiffres décimaux) */
+  --font-family-mono:
+    "JetBrains Mono",
+    "SF Mono",
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     TYPOGRAPHIE — Tailles
+     ─────────────────────────────────────────────────────────────────── */
+
+  /* Échelle modulaire à ratio 1.125 (Major Second) — agréable pour les UIs
+     denses, pas de saut violent entre les tailles */
+  --font-size-xs:           10px;   /* Captions, badges, raccourcis clavier */
+  --font-size-sm:           12px;   /* Labels de section, métadonnées */
+  --font-size-base:         13px;   /* Texte courant sidebar (cars, presets) */
+  --font-size-md:           14px;   /* Texte principal main panel */
+  --font-size-lg:           16px;   /* Titres de section */
+  --font-size-xl:           20px;   /* Titres de vue */
+  --font-size-2xl:          24px;   /* Brand wordmark (DRIFTDECKX) */
+  --font-size-3xl:          32px;   /* Titres dashboard, grandes valeurs */
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     TYPOGRAPHIE — Poids
+     ─────────────────────────────────────────────────────────────────── */
+
+  --font-weight-normal:     400;
+  --font-weight-medium:     500;
+  --font-weight-semibold:   600;
+  --font-weight-bold:       700;
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     TYPOGRAPHIE — Espacement lettre et hauteur de ligne
+     ─────────────────────────────────────────────────────────────────── */
+
+  /* Pour les labels en MAJUSCULES (genre "GARAGE", noms de brands) :
+     un letter-spacing élargi améliore beaucoup la lisibilité */
+  --letter-spacing-tight:   -0.01em;
+  --letter-spacing-normal:  0em;
+  --letter-spacing-wide:    0.08em;
+  --letter-spacing-widest:  0.15em;
+
+  --line-height-tight:      1.2;
+  --line-height-normal:     1.5;
+  --line-height-relaxed:    1.75;
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     ESPACEMENTS
+     ─────────────────────────────────────────────────────────────────── */
+
+  /* Échelle 4px-based, standard moderne. Couvre tous les besoins de
+     padding/margin/gap sans jamais inventer de valeur arbitraire. */
+  --space-0:                0;
+  --space-1:                4px;
+  --space-2:                8px;
+  --space-3:                12px;
+  --space-4:                16px;
+  --space-5:                20px;
+  --space-6:                24px;
+  --space-8:                32px;
+  --space-10:               40px;
+  --space-12:               48px;
+  --space-16:               64px;
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     RAYONS DE BORDURE
+     ─────────────────────────────────────────────────────────────────── */
+
+  --radius-none:            0;
+  --radius-sm:              4px;    /* boutons, badges, inputs */
+  --radius-md:              6px;    /* cartes, panneaux */
+  --radius-lg:              8px;    /* modales, gros conteneurs */
+  --radius-xl:              12px;   /* éléments "hero" */
+  --radius-full:            9999px; /* pills, toggles ronds */
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     OMBRES
+     ─────────────────────────────────────────────────────────────────── */
+
+  /* Ombres adaptées au fond noir : plus subtiles que sur fond clair,
+     et teintées légèrement noir pur (pas de gris qui blanchit) */
+  --shadow-sm:              0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md:              0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg:              0 12px 32px rgba(0, 0, 0, 0.6);
+
+  /* Glow lime — pour les états focus/active forts */
+  --shadow-accent-glow:     0 0 0 3px rgba(202, 255, 0, 0.15);
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     TRANSITIONS
+     ─────────────────────────────────────────────────────────────────── */
+
+  /* Easings cohérents avec les standards modernes (Material 3, Apple HIG).
+     Ne JAMAIS utiliser `ease-in` brut sur des actions UI — toujours
+     `ease-out` ou `cubic-bezier(0.4, 0, 0.2, 1)` (= Material standard). */
+
+  --transition-fast:        0.12s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base:        0.2s  cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:        0.3s  cubic-bezier(0.4, 0, 0.2, 1);
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     DIMENSIONS GLOBALES
+     ─────────────────────────────────────────────────────────────────── */
+
+  /* Largeur fixe de la sidebar (cadrée à 256px dans la conception initiale) */
+  --size-sidebar-width:     256px;
+
+  /* Hauteur d'une ligne de car dans la sidebar — utilisée par l'indicateur
+     animé pour calculer sa position */
+  --size-car-row-height:    32px;
+
+
+  /* ──────────────────────────────────────────────────────────────────────
+     Z-INDEX
+     ─────────────────────────────────────────────────────────────────── */
+
+  /* Échelle d'empilement explicite pour éviter les guerres de z-index */
+  --z-base:                 1;
+  --z-sidebar:              10;
+  --z-dropdown:             100;
+  --z-modal:                1000;
+  --z-toast:                10000;
+}

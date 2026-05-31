@@ -1,0 +1,37 @@
+/* ============================================================================
+   DriftDeckX — Point d'entrée CSS
+   ============================================================================
+
+   Ce fichier est référencé une seule fois dans index.html. Il importe tous
+   les autres CSS dans l'ordre de la cascade :
+
+     1. tokens.css     → variables CSS (couleurs, espacements, typo)
+     2. reset.css      → normalisation cross-browser
+     3. base.css       → styles HTML globaux (body, titres, focus)
+     4. layout.css     → grille principale .app
+     5. components/*   → un fichier par composant UI
+
+   L'ordre est CRITIQUE :
+   - tokens DOIT venir en premier (les autres y font référence)
+   - reset DOIT venir avant base (pour que nos styles écrasent ceux du reset)
+   - components viennent EN DERNIER (pour pouvoir override layout/base si besoin)
+
+   ⚠️ Note sur les @import :
+   Les @import en CSS sont synchrones et bloquent le rendu jusqu'à ce que
+   chaque fichier soit chargé. Pour la V0 c'est acceptable (5 fichiers, dev
+   local), mais en V1 production on pourra :
+     - Soit concaténer tous les CSS en un seul fichier (build step)
+     - Soit charger plusieurs <link> en parallèle dans index.html
+   Pour l'instant, on garde @import pour avoir UN SEUL <link> dans le HTML.
+   ========================================================================= */
+
+@import url("./tokens.css");
+@import url("./reset.css");
+@import url("./base.css");
+@import url("./layout.css");
+
+@import url("./components/sidebar.css");
+@import url("./components/form.css");
+@import url("./components/preset-view.css");
+@import url("./components/modal.css");
+@import url("./components/dashboard.css");

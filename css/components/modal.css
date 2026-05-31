@@ -1,0 +1,259 @@
+/* ============================================================================
+   DriftDeckX — Modale réutilisable
+   ============================================================================
+
+   Pattern : un overlay plein écran (backdrop sombre semi-opaque) avec une
+   boîte centrée. Utilisé pour les confirmations de suppression, le
+   renommage, et toute future action qui nécessite une validation utilisateur.
+
+   Structure HTML :
+     .modal-overlay              (backdrop + flex center)
+       └─ .modal                 (boîte centrée)
+           ├─ .modal__title      (titre)
+           ├─ .modal__message    (corps optionnel)
+           ├─ .modal__input      (champ optionnel)
+           └─ .modal__footer     (boutons)
+               ├─ .modal__button--cancel
+               └─ .modal__button--confirm (--danger optionnel)
+   ========================================================================= */
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Overlay (backdrop)
+   ───────────────────────────────────────────────────────────────────── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal, 1000);
+
+  /* Backdrop sombre semi-transparent */
+  background: rgba(0, 0, 0, 0.7);
+
+  /* Centrage du modal */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Padding pour laisser de l'air sur les bords si écran petit */
+  padding: var(--space-6);
+
+  /* Petite animation d'apparition pour adoucir l'arrivée */
+  animation: modal-fade-in 0.15s ease-out;
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Modal box
+   ───────────────────────────────────────────────────────────────────── */
+
+.modal {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.6));
+
+  padding: var(--space-6);
+  width: 100%;
+  max-width: 480px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  /* Petite animation de "pop" à l'arrivée */
+  animation: modal-pop-in 0.2s ease-out;
+}
+
+@keyframes modal-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Titre
+   ───────────────────────────────────────────────────────────────────── */
+
+.modal__title {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  line-height: var(--line-height-tight);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Message
+   ───────────────────────────────────────────────────────────────────── */
+
+.modal__message {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-normal);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.modal__message p {
+  margin: 0;
+}
+
+.modal__message strong {
+  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Ligne "emphasis" : nom du preset à taper, mis en avant */
+.modal__message-emphasis {
+  /* Plus visible que le texte du dessus pour que l'user voie ce qu'il
+     doit taper sans ambiguïté */
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-accent) !important;
+
+  /* Empêche la sélection et copie pour éviter les triches (l'user doit
+     vraiment retaper le nom à la main, ça ralentit + force l'attention) */
+  user-select: none;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Input (saisie de confirmation)
+   ───────────────────────────────────────────────────────────────────── */
+
+.modal__input {
+  width: 100%;
+
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+
+  transition: border-color var(--transition-fast),
+              box-shadow var(--transition-fast);
+}
+
+.modal__input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-accent-glow);
+}
+
+.modal__input::placeholder {
+  color: var(--color-text-subtle);
+  font-style: italic;
+}
+
+/* Message d'erreur sous l'input (mode "free" : longueur max dépassée).
+   Caché par défaut, affiché via JS quand la validation échoue. */
+.modal__error {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+  /* Léger retrait pour s'aligner visuellement avec le contenu de l'input */
+  padding-left: var(--space-1);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Footer (boutons)
+   ───────────────────────────────────────────────────────────────────── */
+
+.modal__footer {
+  display: flex;
+  justify-content: flex-start;
+  gap: var(--space-2);
+}
+
+.modal__button {
+  appearance: none;
+  font-family: inherit;
+  cursor: pointer;
+
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+  white-space: nowrap;
+
+  transition: background var(--transition-fast),
+              border-color var(--transition-fast),
+              color var(--transition-fast),
+              opacity var(--transition-fast);
+}
+
+.modal__button:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-accent-glow);
+}
+
+.modal__button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Bouton Annuler : neutre, gris */
+.modal__button--cancel {
+  background: transparent;
+  color: var(--color-text-muted);
+  border-color: var(--color-border-strong);
+}
+
+.modal__button--cancel:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+  border-color: var(--color-text-subtle);
+}
+
+/* Bouton Confirmer (par défaut) : lime */
+.modal__button--confirm {
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+  border-color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+}
+
+.modal__button--confirm:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+/* Bouton Confirmer en mode "danger" : rouge plein (suppression, etc.) */
+.modal__button--confirm.modal__button--danger {
+  background: var(--color-danger);
+  color: var(--color-text);
+  border-color: var(--color-danger);
+}
+
+.modal__button--confirm.modal__button--danger:hover:not(:disabled) {
+  background: var(--color-danger-hover, #E53E4E);
+  border-color: var(--color-danger-hover, #E53E4E);
+}

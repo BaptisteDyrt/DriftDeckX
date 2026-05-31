@@ -1,0 +1,522 @@
+/* ============================================================================
+   DriftDeckX — Sidebar
+   ============================================================================
+
+   Sidebar latérale fixe (216px × 100dvh).
+
+   Structure :
+     .sidebar (grid 3 rows: auto / auto / 1fr)
+       ├─ .sidebar__header   (fixe, brand)
+       ├─ .sidebar__nav      (fixe, lien Dashboard)
+       └─ .sidebar__garage   (scroll interne, accordéons de brands)
+
+   Tous les tokens viennent de tokens.css. Aucune valeur en dur.
+   ========================================================================= */
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Container principal
+   ───────────────────────────────────────────────────────────────────── */
+
+.sidebar {
+  /* Dimensions cadrées dès la conception */
+  width: var(--size-sidebar-width);
+  height: 100dvh;
+
+  /* Layout : 3 zones, seul le Garage prend l'espace restant et scroll */
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+
+  /* Identité visuelle */
+  background: var(--color-bg-sidebar);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+
+  /* Une ligne très subtile de séparation avec le main panel */
+  border-right: 1px solid var(--color-border);
+
+  /* Empilement */
+  position: relative;
+  z-index: var(--z-sidebar);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Zone 1 : Header (logo + wordmark + tagline)
+   ───────────────────────────────────────────────────────────────────── */
+
+.sidebar__header {
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.brand__logo {
+  /* Le SVG est sized via attributs, on s'assure juste qu'il ne se déforme pas */
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.brand__text {
+  /* Permet à la colonne texte de se compresser et tronquer si besoin */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand__name {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text);
+  line-height: var(--line-height-tight);
+
+  /* Si le nom est plus long que la zone, on tronque proprement */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brand__tagline {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-tight);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Zone 2 : Navigation rapide (Dashboard)
+   ───────────────────────────────────────────────────────────────────── */
+
+.sidebar__nav {
+  padding: var(--space-3) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.nav-item {
+  /* Reset des styles de bouton natifs */
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  text-align: left;
+
+  /* Layout interne : icône — label — raccourci */
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  /* Dimensions : pleine largeur de la sidebar moins son padding */
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+
+  /* Coins arrondis discrets */
+  border-radius: var(--radius-sm);
+
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-item:hover {
+  background: var(--color-bg-hover);
+}
+
+.nav-item:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-accent-glow);
+}
+
+/* État actif (aria-current="page") : fond teinté lime + accent sur l'icône */
+.nav-item[aria-current="page"] {
+  background: var(--color-bg-active);
+  color: var(--color-text);
+}
+
+.nav-item[aria-current="page"] .nav-item__icon {
+  color: var(--color-accent);
+}
+
+.nav-item__icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast);
+}
+
+.nav-item__label {
+  flex: 1;
+  font-weight: var(--font-weight-medium);
+}
+
+.nav-item__shortcut {
+  /* Style "raccourci clavier" minimaliste */
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-subtle);
+  background: var(--color-bg-elevated);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-strong);
+  line-height: 1;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Zone 3 : Garage (scroll interne)
+   ───────────────────────────────────────────────────────────────────── */
+
+.sidebar__garage {
+  /* La seule zone qui scrolle indépendamment */
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding: var(--space-4) var(--space-3) var(--space-4);
+
+  /* Scrollbar discrète, dans le thème */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+.sidebar__garage::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar__garage::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar__garage::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: var(--radius-full);
+}
+.sidebar__garage::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-subtle);
+}
+
+.garage__title {
+  /* Le label "GARAGE" gris clair en haut de la zone */
+  margin: 0 0 var(--space-3);
+  padding: 0 var(--space-2);
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-widest);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+/* Container des brands : reset des styles de liste */
+.brands {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Message "garage vide" (cas où aucun preset).
+   Aligné à gauche pour rester cohérent avec le rythme visuel de la
+   sidebar (tous les autres éléments du Garage sont alignés à gauche). */
+.brands__empty {
+  padding: var(--space-3) var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-align: left;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Brand (accordéon)
+   ───────────────────────────────────────────────────────────────────── */
+
+.brand-item {
+  list-style: none;
+}
+
+.brand-details {
+  /* Pas de bordure de focus moche du browser sur le <details> lui-même */
+  outline: none;
+}
+
+/* Header cliquable d'une brand (le <summary>) */
+.brand-summary {
+  /* Retire la flèche native du navigateur */
+  list-style: none;
+  cursor: pointer;
+
+  /* Layout interne : chevron + nom */
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  padding: var(--space-2) var(--space-2);
+  border-radius: var(--radius-sm);
+
+  /* Typo des noms de brand : majuscules condensées, vibe racing */
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-widest);
+  text-transform: uppercase;
+  color: var(--color-text);
+
+  transition: background var(--transition-fast);
+  user-select: none;
+}
+
+/* Retire la flèche native sur Safari */
+.brand-summary::-webkit-details-marker {
+  display: none;
+}
+
+.brand-summary:hover {
+  background: var(--color-bg-hover);
+}
+
+.brand-summary:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-accent-glow);
+}
+
+/* Chevron à gauche du nom de brand */
+.brand-summary__chevron {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  color: var(--color-text-muted);
+  transition: transform var(--transition-base);
+}
+
+/* Quand la brand est ouverte, le chevron pointe vers le bas */
+.brand-details[open] > .brand-summary > .brand-summary__chevron {
+  transform: rotate(90deg);
+}
+
+.brand-summary__name {
+  /* Permet l'ellipsis si nom long */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Cars (liste à l'intérieur d'une brand)
+   ───────────────────────────────────────────────────────────────────── */
+
+/* Wrapper autour de <ul.cars> — utile pour positionner l'indicateur jaune
+   en absolute (à venir) sans casser la structure de liste. */
+.cars-wrapper {
+  position: relative;
+  padding-left: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.cars {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  /* Track grise verticale qui matérialise la liste d'une brand ouverte */
+  border-left: 1px solid var(--color-track);
+  padding-left: var(--space-3);
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.car-item {
+  list-style: none;
+}
+
+/* Bouton car (cliquable, contient nom IRL + nom CarX + badge éventuel) */
+.car-button {
+  /* Reset */
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+
+  /* Layout : noms à gauche, badge à droite */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+
+  width: 100%;
+  padding: var(--space-2) var(--space-2);
+  min-height: var(--size-car-row-height);
+
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.car-button:hover {
+  background: var(--color-bg-hover);
+}
+
+.car-button:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-accent-glow);
+}
+
+/* État actif (car sélectionnée dans la sidebar) */
+.car-button.is-active,
+.car-button[aria-current="true"] {
+  background: var(--color-bg-active);
+}
+
+/* Zone des noms (IRL + CarX sur 2 lignes) */
+.car-button__names {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.car-button__name-real {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  line-height: var(--line-height-tight);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.car-button__name-carx {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-tight);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badge du nombre de presets (visible si 2+ presets sur cette car) */
+.car-button__badge {
+  flex-shrink: 0;
+
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+
+  padding: 3px 6px;
+  border-radius: var(--radius-full);
+
+  /* Pour que le badge ne change pas de taille selon le contenu (2 vs 12 vs 99) */
+  min-width: 18px;
+  text-align: center;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Presets (sous-liste sous une car active avec 2+ presets)
+   ───────────────────────────────────────────────────────────────────── */
+
+.presets {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-1) 0 var(--space-2);
+  padding-left: var(--space-1) !important;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.preset-item {
+  list-style: none;
+}
+
+.preset-button {
+  /* Reset */
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  width: 100%;
+  padding: var(--space-2) var(--space-2);
+  border-radius: var(--radius-sm);
+
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.preset-button:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}
+
+.preset-button:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-accent-glow);
+}
+
+/* Preset actif : couleur accent + chevron visible */
+.preset-button.is-active,
+.preset-button[aria-current="true"] {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+  background: var(--color-bg-hover);
+}
+
+.preset-button.is-active .preset-button__marker,
+.preset-button[aria-current="true"] .preset-button__marker {
+  color: var(--color-accent);
+  opacity: 1;
+}
+
+/* Le chevron "›" devant le nom — visible seulement quand actif */
+.preset-button__marker {
+  flex-shrink: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-md);
+  line-height: 1;
+  color: var(--color-text-subtle);
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+
+.preset-button__name {
+  min-width: 0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DriftDeckX</title>
+
+  <!--
+    Google Fonts — Space Grotesk
+    - preconnect : ouvre la connexion TCP/TLS à l'avance pour gagner ~100ms
+    - display=swap : affiche d'abord en font système, swap quand Space Grotesk est prête (évite le "flash de texte invisible" / FOIT)
+    - 4 graisses chargées : 400 (normal), 500 (medium), 600 (semibold), 700 (bold)
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" aria-label="Navigation principale">
+      <!-- Header : Logo + Wordmark + Tagline -->
+      <header class="sidebar__header">
+        <div class="brand">
+          <img src="./assets/logo.svg" alt="Logo de DriftDeckX" class="brand__logo" aria-hidden="true">
+          <div class="brand__text">
+            <p class="brand__name">DRIFTDECKX</p>
+            <p class="brand__tagline">Configuration CarX</p>
+          </div>
+        </div>
+      </header>
+
+      <!-- ─── Navigation rapide : Dashboard ───────────────────────── -->
+      <nav class="sidebar__nav" aria-label="Navigation rapide">
+        <!-- aria-current à faire changer en fonction de la vue active (à câbler en JS plus tard) -->
+        <button type="button" class="nav-item" data-view="dashboard">
+          <img src="./assets/icons/icon-dashboard.svg" alt="Icône Dashboard" class="nav-item__icon" aria-hidden="true" width="16" height="16">
+          <span class="nav-item__label">Dashboard</span>
+
+          <kbd class="nav-item__shortcut" data-shortcut="B"></kbd>
+        </button>
+        <button type="button" class="nav-item" data-view="add-setup">
+          <img src="./assets/icons/icon-add.svg" alt="Icône Ajouter un réglages" class="nav-item__icon" aria-hidden="true" width="16" height="16">
+          <span class="nav-item__label">Ajouter un réglage</span>
+          
+          <kbd class="nav-item__shortcut" data-shortcut="G"></kbd>
+        </button>
+      </nav>
+
+      <!-- ─── Section Garage (scroll interne) ─────────────────────── -->
+      <section class="sidebar__garage" aria-label="Garage">
+        <h2 class="garage__title">Garage</h2>
+
+        <!--
+          Container des brands.
+          ⚠️ Ce <ul> est vide au chargement HTML — son contenu sera
+          injecté dynamiquement par js/ui/sidebar.js depuis le state
+          et les données du storage.
+
+          L'attribut role="list" force Safari à garder la sémantique liste
+          même quand on retire les puces en CSS.
+        -->
+        <ul id="garage-list" class="brands" role="list">
+          <!-- Brands, cars et presets injectés dynamiquement par JS -->
+        </ul>
+
+      </section>
+
+    </aside>
+
+
+    <!-- ══════════════════════════════════════════════════════════════
+         MAIN PANEL
+         ══════════════════════════════════════════════════════════ -->
+    <!--
+      Tout le contenu du main panel est généré par JS selon state.view :
+      - "dashboard" → ui/dashboard.js
+      - "preset"    → ui/preset.js
+      - "form"    → ui/form.js
+
+      L'élément <main> reçoit le contenu via innerHTML / append depuis
+      js/main.js, qui orchestre les renders selon le state.
+    -->
+    <main id="main-panel" class="main-panel" aria-live="polite">
+      <!-- Contenu dynamique : dashboard ou détail d'un preset -->
+    </main>
+
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,236 @@
+/* ============================================================================
+   DriftDeckX — Dashboard (page d'accueil)
+   ============================================================================
+
+   Structure :
+     .dashboard
+       ├─ .dashboard__hero            (tagline + titre principal)
+       └─ .dashboard__content         (contenu si presets)
+           ├─ .dashboard__kpi-row     (4 KPI cards en ligne)
+           │   └─ .kpi-card (×4)
+           └─ .dashboard__averages-row (2 cards Suspension/Alignement)
+               └─ .preset-card (×2, réutilisé depuis preset-view)
+
+     OU si garage vide :
+     .dashboard
+       ├─ .dashboard__hero
+       └─ .dashboard__empty           (message + CTA)
+
+   Les .preset-card de la ligne du bas réutilisent le composant existant
+   de preset-view.css — donc les rows, valeurs AV/AR, etc. héritent
+   automatiquement du même style. On override juste le grid-area inline
+   pour qu'elles ne soient pas placées dans la grille 3×3 de preset-view.
+   ========================================================================= */
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Container racine
+   ───────────────────────────────────────────────────────────────────── */
+
+.dashboard {
+  width: 100%;
+  padding: var(--space-6) 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Hero (tagline + titre principal)
+   ───────────────────────────────────────────────────────────────────── */
+
+.dashboard__hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dashboard__tagline {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-widest);
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.dashboard__title {
+  margin: 0;
+  font-size: 4rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  color: var(--color-text);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Contenu principal (quand au moins 1 preset)
+   ───────────────────────────────────────────────────────────────────── */
+
+.dashboard__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   KPI Row : 4 cards en ligne avec largeur égale
+   ───────────────────────────────────────────────────────────────────── */
+
+.dashboard__kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   KPI Card : grosse valeur + label en dessous
+   ─────────────────────────────────────────────────────────────────────────
+
+   Structure :
+     ┌──────────────────────────┐
+     │  1350 kg                 │   ← .kpi-card__value-row
+     │  Poids moyen             │   ← .kpi-card__label
+     └──────────────────────────┘
+   ───────────────────────────────────────────────────────────────────── */
+
+.kpi-card {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.kpi-card__value-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+}
+
+.kpi-card__value {
+  font-size: 2.5rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: 1;
+  color: var(--color-text);
+  font-family: var(--font-family);
+}
+
+.kpi-card__suffix {
+  /* Suffixe (kg, %) plus petit et gris, accolé à la valeur principale */
+  font-size: var(--font-size-sm);
+  color: var(--color-text-subtle);
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-medium);
+}
+
+.kpi-card__label {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-normal);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Averages Row : Suspension + Alignement (2 cards 50/50)
+   ─────────────────────────────────────────────────────────────────────────
+
+   Les cards utilisent .preset-card (de preset-view.css) pour réutiliser
+   les styles existants (header, body, rows, valeurs AV/AR, etc.).
+
+   Note : on override le grid-area inline via style="" dans le JS, pour
+   neutraliser l'effet du grid-template-areas de preset-view qui ne
+   s'applique pas ici (car .preset-grid n'est pas le parent).
+   ───────────────────────────────────────────────────────────────────── */
+
+.dashboard__averages-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   État vide (aucun preset enregistré)
+   ───────────────────────────────────────────────────────────────────── */
+
+.dashboard__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+
+  padding: var(--space-8);
+  background: var(--color-bg-elevated);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+}
+
+.dashboard__empty-message {
+  margin: 0;
+  font-size: var(--font-size-md);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-normal);
+  text-align: center;
+  max-width: 40ch;
+}
+
+.dashboard__empty-cta {
+  appearance: none;
+  font-family: inherit;
+  cursor: pointer;
+
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.4;
+
+  transition: background var(--transition-fast),
+              border-color var(--transition-fast);
+}
+
+.dashboard__empty-cta:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.dashboard__empty-cta:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-accent-glow);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Note de confidentialité (tout en bas, toujours visible)
+
+   Texte uniquement en gris foncé, pas de box. Discret, pour ne pas
+   attirer l'œil mais accessible pour qui scroll en bas.
+   ────────────────────────────────────────────────────────────────────── */
+
+.dashboard__privacy-note {
+  position: absolute;
+  z-index: 1;
+  bottom: var(--space-8);
+  max-width: 75ch;
+
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-subtle);
+  text-align: center;
+}
