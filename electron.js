@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, nativeImage } = require('electron')
+const { autoUpdater } = require('electron-updater')
 const path = require('path')
 const fs = require('fs')
 const icon = nativeImage.createFromPath(path.join(__dirname, 'assets/Logo.icns'))
@@ -60,6 +61,7 @@ app.whenReady().then(() => {
   app.dock.setIcon(icon)
 
   createWindow()
+  autoUpdater.checkForUpdatesAndNotify()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
