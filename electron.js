@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain, nativeImage } = require('electron')
 const path = require('path')
 const fs = require('fs')
-const icon = nativeImage.createFromPath(path.join(__dirname, 'assets/icons/Logo.png'))
+const icon = nativeImage.createFromPath(path.join(__dirname, 'assets/Logo.icns'))
 
 // Chemin du fichier de données
 const DATA_PATH = path.join(app.getPath('userData'), 'presets.json')
@@ -41,7 +41,7 @@ function createWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     },
-    icon: path.join(__dirname, 'assets/icons/Logo.png'),
+    icon: path.join(__dirname, 'assets/Logo.icns'),
     title: 'DriftDeckX'
   })
 
@@ -54,7 +54,7 @@ app.whenReady().then(() => {
     applicationVersion: '1.0.0',
     version: '1.0.0',
     copyright: '© 2026 Baptiste Dayraut\nDiscord : Clevess_',
-    iconPath: path.join(__dirname, 'assets/icons/Logo.png')
+    iconPath: path.join(__dirname, 'assets/Logo.icns')
   })
 
   app.dock.setIcon(icon)

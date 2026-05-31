@@ -1,25 +1,61 @@
 {
   "name": "driftdeckx",
   "version": "1.0.0",
-  "description": "",
+  "description": "Outil de sauvegarde de préréglages pour CarX Drift Racing Online",
   "main": "electron.js",
-  "scripts": {
-    "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "author": "Baptiste Dayraut",
+  "license": "ISC",
+  "type": "commonjs",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BaptisteDyrt/DriftDeckX.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/BaptisteDyrt/DriftDeckX/issues"
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:all": "electron-builder --mac --win"
   },
-  "homepage": "https://github.com/BaptisteDyrt/DriftDeckX#readme",
   "devDependencies": {
-    "electron": "^42.3.0"
+    "electron": "^42.3.0",
+    "electron-builder": "^26.8.1"
+  },
+  "build": {
+    "appId": "com.baptistedayraut.driftdeckx",
+    "productName": "DriftDeckX",
+    "copyright": "© 2026 Baptiste Dayraut",
+    "files": [
+      "**/*",
+      "!node_modules/**/*",
+      "!dist/**/*",
+      "!.git/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.utilities",
+      "icon": "assets/Logo.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ]
+    },
+    "win": {
+      "icon": "assets/Logo.icns",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "dmg": {
+      "title": "DriftDeckX",
+      "background": null
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }
