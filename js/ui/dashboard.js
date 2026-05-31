@@ -112,12 +112,12 @@ function renderEmptyState() {
  * Rend la note de confidentialité affichée tout en bas du Dashboard.
  *
  * Toujours visible (pas dismissible) pour rassurer les drifteurs sur le
- * fait que DriftDeckX V0 ne transmet aucune donnée nulle part. Pas de box,
+ * fait que DriftDeckX V1 ne transmet aucune donnée nulle part. Pas de box,
  * juste du texte gris foncé discret.
  */
 function renderPrivacyNote() {
   return el("p", { class: "dashboard__privacy-note" },
-    "DriftDeckX V0 fonctionne 100% sur ta machine. Tes réglages sont stockés localement " +
+    "DriftDeckX V1 fonctionne 100% sur ta machine. Tes réglages sont stockés localement " +
     "sur ton PC. Aucune donnée n'est envoyée nulle part, pas de serveur, pas de compte, " +
     "pas de tracking. Si tu désintalles DrifDeckX tu perds tout. " +
     "Pense à récupérer tes réglages stockés dans presets.json dans le dossier de l'application."
