@@ -58,7 +58,7 @@ app.whenReady().then(() => {
       applicationName: 'DriftDeckX',
       applicationVersion: app.getVersion(),
       version: app.getVersion(),
-      copyright: '© 2026 Baptiste Dayraut\nDiscord : Clevess_',
+      copyright: '© 2026 Baptiste Dayraut\nDiscord : Clevess_\nDiscord : https://discord.gg/MCuWPdU3',
       iconPath: path.join(__dirname, 'assets/Logo.icns')
     })
 
